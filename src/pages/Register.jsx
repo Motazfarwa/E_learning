@@ -17,7 +17,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:4000/api/register", { email, password });
+      const response = await axios.post("http://localhost:4000/api/register", { FullName, email, password, role });
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", response.data.role);
@@ -27,6 +27,7 @@ const Login = () => {
       alert("Invalid email or password. Please try again.");
     }
   };
+
 
 
 
