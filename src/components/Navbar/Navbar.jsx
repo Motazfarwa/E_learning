@@ -4,6 +4,7 @@ import { HiMenuAlt1, HiX } from "react-icons/hi";
 import NavLink from "./NavLink";
 import MobileNavLinks from "./MobileNavLinks";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const [Tonggle, setTonggle] = useState(false);
   const [active, setactive] = useState(null);
@@ -14,7 +15,7 @@ const Navbar = () => {
     window.addEventListener("scroll", scrollActive);
     return () => window.removeEventListener("scroll", scrollActive);
   }, [active]);
-
+ const navigate = useNavigate();
   return (
     <div
       className={`${
@@ -41,8 +42,8 @@ const Navbar = () => {
               return <NavLink key={navLink.id} {...navLink} />;
             })}
           </div>
-          <button className="py-3 px-6 font-bold text-sm border rounded-md border-solid border-gray ">
-            Sign Up
+          <button className="py-3 px-6 font-bold text-sm border rounded-md border-solid border-gray " onClick={()=>navigate('/login')}>
+         Logout
           </button>
           {Tonggle && (
             <div className="fixed w-96 top-0 left-0 h-full bg-teal-700 flex flex-col justify-center items-center shadow-lg gap-8 py-8">

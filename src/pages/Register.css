@@ -1,0 +1,31 @@
+.custom-dropdown {
+    padding: 0.8rem 1.2rem;
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.custom-dropdown:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.custom-dropdown option {
+    padding: 0.8rem;
+}
+
+.custom-dropdown:hover {
+    border-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
