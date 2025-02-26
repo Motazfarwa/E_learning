@@ -5,13 +5,12 @@ import logologin from "../assets/logologin.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa"; // Import icons
-import { motion } from "framer-motion";
-import { RoleContext } from "./RoleContext";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -36,39 +35,10 @@ const Login = () => {
     }
   };
 
-  const linkStyle = {
-    textDecoration: 'none',
-    color: 'white',
-    fontWeight: 'bold',
-    display: 'block',
-    padding: '5px 2px',
-    borderRadius: '5px',
-    transition: '0.3s',
-  };
-  const role = useContext(RoleContext);
 
   return (
     <div className="login-container">
-             <div
-        style={{
-          width: '100%',
-          background: 'rgba(255, 255, 255, 0.27)',
-          boxShadow: '0 4px 10px rgba(42, 87, 190, 0.2)',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-    <img 
-     style={{ width: '170px', height: '70px' }} 
-     src={logo}
-     alt="Logo" 
-      />
-      </div>
+  
       {/* Left Section */}
       <div className="left-section">
         <h1>Respect & Acountability & Determination</h1><br/>
