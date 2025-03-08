@@ -89,7 +89,7 @@ const Login = () => {
               <FaLock className="input-icon" />
             </div>
 
-            <div >
+            <div>
     <select
         id="role"
         value={role}
@@ -100,13 +100,14 @@ const Login = () => {
         <option value="ADMIN">Admin</option>
         <option value="INSTRUCTEUR">Instructeur</option>
         <option value="APPRENANT">Apprenant</option>
+        <option value="EXPERT"> Expert</option>
     </select>
-</div>
+          </div>
 
 
 
             <button type="submit" className="auth-button">
-              Sign In
+              Sign Up
             </button>
           </form>
 
