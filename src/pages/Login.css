@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    background-color: #046eaf;
     color: white;
     text-align: center;
 }
@@ -133,7 +133,7 @@
 
 /* Submit Button */
 .auth-button {
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    background-color: #046eaf;
     color: white;
     padding: 1rem;
     border: none;
