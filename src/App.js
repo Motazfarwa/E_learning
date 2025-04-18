@@ -12,6 +12,8 @@ import Coursedetails from './pages/Coursedetails';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
+import MeetingPage from './pages/Meetingpage';
+import ErrorBoundary from './pages/ErrorBoundary';
 
 
 // Your Stripe publishable key (replace with your own key)
@@ -34,9 +36,21 @@ function App() {
   {/* Protected Routes - Role Based Access */}
   <Route path="/home" element={<ProtectedRoute allowedRoles={['INSTRUCTEUR']}><Template /></ProtectedRoute>} />
   <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><Dashboard /></ProtectedRoute>} />
-  <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN']}><Addcourseform /></ProtectedRoute>} />
+  <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Addcourseform /></ProtectedRoute>} />
   <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
+   {/* Add ErrorBoundary INSIDE ProtectedRoute */}
+   <Route 
+                path="/meetings/:meetingId" 
+                element={
+                  <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+                    <ErrorBoundary> {/* Specific boundary for meeting page */}
+                      <MeetingPage />
+                    </ErrorBoundary>
+                  </ProtectedRoute>
+                } 
+              />
   <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
+  
   <Route
   path="/payment"
   element={

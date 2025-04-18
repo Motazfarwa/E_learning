@@ -1,99 +1,219 @@
-import React, {  useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import logo from "../assets/51031-removebg-preview.png";
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { Layout, Menu, Card, Input, Button, List } from 'antd';
+import {
+  HomeOutlined,
+  BookOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { Avatar } from "antd";
 
-const Coursedetails = () => {
+
+const { Header, Sider, Content } = Layout;
+const { TextArea } = Input;
+
+const CourseDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [machine, setMachine] = useState(null);  
-  const [imageError, setImageError] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    console.log("Fetching data for ID:", id);
-    if (!id) {
-      console.error("Error: ID is undefined");
-      return;
-    }
-  
-    fetch(`http://localhost:4000/api/courses/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched Machine Data:", data); // Log the fetched data
-        setMachine(data);
+    axios.get(`http://localhost:4000/api/courses/${id}`)
+      .then((response) => {
+        setCourse(response.data);
+        setLoading(false);
       })
-      .catch((error) => console.error("Error fetching machine details:", error));
+      .catch(() => {
+        setError('Error fetching course details');
+        setLoading(false);
+      });
+
+    axios.get(`http://localhost:4000/api/${id}/comments`)
+      .then((response) => setComments(response.data))
+      .catch(() => console.error("Error fetching comments"));
   }, [id]);
+  const fullname = localStorage.getItem('FullName')
+
+  const handleCommentSubmit = (type) => {
+    if (!newComment.trim()) return;
   
-
-  if (!machine) {
-    return <p>Loading...</p>;
-  }
-
-
+    const newCommentData = { text: newComment, type, userId: fullname}; // Include userId
+  
+    axios.post(`http://localhost:4000/api/${id}/comments`, newCommentData, { withCredentials: true })
+      .then(() => {
+        setNewComment("");
+  
+        // Fetch updated comments
+        axios.get(`http://localhost:4000/api/${id}/comments`)
+          .then((response) => setComments(response.data))
+          .catch(() => console.error("Error fetching updated comments"));
+      })
+      .catch(() => console.error("Error posting comment"));
+  };
+  
+  if (loading) return <p style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold" }}>Loading course details...</p>;
+  if (error) return <p style={{ textAlign: "center", color: "red", fontSize: "18px" }}>{error}</p>;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      {/* Top Navigation */}
- <div className="w-full bg-black shadow-md fixed top-0 left-0 z-50 flex items-center justify-between px-6 py-4">
- <img className="w-13 h-9" src={logo} alt="Logo" />
-  
-  <div className="cursor-pointer flex flex-col space-y-1" onClick={() => setIsOpen(!isOpen)}>
-    <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-    <span className={`block w-8 h-1 bg-white transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} />
-    <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-  </div>
-</div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} style={styles.sider}>
+        <div style={styles.logo}>My Courses</div>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+          <Menu.Item key="1" icon={<HomeOutlined />}>
+            <Link to="/">Home</Link>
+          </Menu.Item>
+          <Menu.Item key="2" icon={<BookOutlined />}>
+            <Link to="/courses">Courses</Link>
+          </Menu.Item>
+          <Menu.Item key="3" icon={<UserOutlined />}>
+            <Link to="/profile">Profile</Link>
+          </Menu.Item>
+        </Menu>
+      </Sider>
 
+      <Layout>
+        <Header style={styles.header}>Course Details</Header>
+        <Content style={styles.content}>
+          <Card
+            title={course.nom}
+            bordered={false}
+            style={styles.card}
+          >
+            {/* Centered Course Image */}
+            {course.courseimagefile && (
+              <div style={styles.imageContainer}>
+                <img 
+                  src={`http://localhost:4000/uploads/${course.courseimagefile}`} 
+                  alt={course.nom} 
+                  style={styles.image} 
+                />
+              </div>
+            )}
 
-     {/* Sidebar Navigation */}
-    <div className={`fixed top-0 left-0 h-full w-64 bg-black p-6 pb-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-64'}`}>
-    <ul className="text-white space-y-12">
-    <li><a href="/Ajoutercour" className="block hover:text-gray-300 font-bold">Ajouter des cours</a></li>
-    <li><a href="/Ajoutercour" className="block hover:text-gray-300 font-bold">Ajouter des cours</a></li>
-    <li><a href="/getcours" className="block hover:text-gray-300 font-bold">List des cours</a></li>
-    </ul>
-    </div>
+            {/* Course Description */}
+            <p style={styles.description}>{course.description}</p>
 
-
-      {/* Main Content */}
-      <div className="mt-20 p-6 bg-white rounded-lg shadow-md w-96 text-center">
-        {/* Display Image if available */}
-        {machine.courseimagefile && !imageError ? (
-          <img
-            className="max-w-full h-auto rounded-lg mb-4"
-            src={`http://localhost:4000/uploads/${machine.courseimagefile}`}
-            alt="Machine"
-            onError={() => setImageError(true)}
-          />
-        ) : imageError ? (
-          <p className="text-red-500">Image not available</p>
-        ) : null}
-
-        {/* Machine Details */}
-        <p className="mb-2"><strong>Nom:</strong> {machine.nom}</p>
-        <p className="mb-4"><strong>Description:</strong> {machine.description}</p>
-
-        {/* File Download */}
-        {machine.file && (
-          <div className="mb-4">
-           <p className="mb-4"><strong>File:</strong> {machine.file}</p>
-            <a href={`http://localhost:4000/api/download/${machine.file}`} download>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Download File</button>
-            </a>
-          </div>
-        )}
-
-        <button 
-          onClick={() => navigate('/getcours')} 
-          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
-        >
-          Back to course list
-        </button>
+            {/* Files: Video and PDF */}
+            {course.file && Array.isArray(course.file) && course.file.length > 0 && (
+              <div style={styles.fileContainer}>
+                {course.file.map((file, index) => {
+                  // Video handling
+                  if (file.endsWith('.mp4')) {
+                    return (
+                      <div key={index} style={styles.fileItem}>
+                        <h4 style={styles.fileTitle}>Lecture Video</h4>
+                        <div style={styles.videoContainer}>
+                          <video controls style={styles.video}>
+                            <source src={`http://localhost:4000/uploads/${file}`} type="video/mp4" />
+                          </video>
+                        </div>
+                        {/* Video Comment Section */}
+                        <div style={styles.commentSection}>
+                          <h4>Video Comments</h4>
+                          <List dataSource={comments.filter(c => c.type === 'video')} renderItem={(comment) => (
+                            <List.Item>{comment.text}</List.Item>
+                          )} />
+                          <TextArea
+                            rows={3}
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Add a comment for the video..."
+                            style={styles.textArea}
+                          />
+                          <Button 
+                            type="primary" 
+                            onClick={() => handleCommentSubmit('video')} 
+                            style={styles.submitButton}
+                          >
+                            Post Video Comment
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  // PDF handling
+                  if (file.endsWith('.pdf')) {
+                    return (
+                      <div key={index} style={styles.fileItem}>
+                        <h4 style={styles.fileTitle}>Course Document</h4>
+                        <a 
+                          href={`http://localhost:4000/uploads/${file}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          style={styles.downloadLink}
+                        >
+                          📂 Download PDF
+                        </a>
+                        {/* PDF Comment Section */}
+                        <div style={styles.commentSection}>
+                          <h4>PDF Comments</h4>
+                          <List
+  dataSource={comments.filter(c => c.type === 'pdf')}
+  renderItem={(comment) => (
+    <List.Item className="comment-item">
+      <div className="comment-content">
+        <div className="comment-header">
+          <Avatar size={16} icon={<UserOutlined />} className="comment-icon" />
+          <span className="comment-username">{comment.userId}</span>
+        </div>
+        <p className="comment-text">{comment.text}</p>
       </div>
-    </div>
+    </List.Item>
+  )}
+/>
+                  <TextArea
+                            rows={3}
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Add a comment for the PDF..."
+                            style={styles.textArea}
+                          />
+                          <Button 
+                            type="primary" 
+                            onClick={() => handleCommentSubmit('pdf')} 
+                            style={styles.submitButton}
+                          >
+                            Post PDF Comment
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return <p key={index} style={styles.noFileText}>File format not supported.</p>;
+                })}
+              </div>
+            )}
+          </Card>
+        </Content>
+      </Layout>
+    </Layout>
   );
-  
 };
 
-export default Coursedetails;
+const styles = {
+  sider: { background: '#001529', width: 240 },
+  logo: { color: '#fff', fontSize: '24px', fontWeight: 'bold', textAlign: 'center', padding: '20px' },
+  header: { background: '#1890ff', color: '#fff', fontSize: '24px', textAlign: 'center', padding: '15px' },
+  content: { margin: '20px', padding: '20px', background: '#fff', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' },
+  card: { textAlign: 'center', boxShadow: '0 6px 12px rgba(0,0,0,0.1)', borderRadius: '10px', padding: '20px' },
+  description: { fontSize: '18px', color: '#333', marginBottom: '15px' },
+  imageContainer: { marginBottom: '20px', display: 'flex', justifyContent: 'center' },
+  image: { width: '100%', maxWidth: '600px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' },
+  fileContainer: { marginTop: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '10px' },
+  fileItem: { marginBottom: '15px', padding: '15px', background: '#fff', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' },
+  videoContainer: { display: 'flex', justifyContent: 'center' },
+  video: { width: '80%', maxWidth: '800px', borderRadius: '10px' },
+  downloadLink: { fontSize: '16px', color: '#1890ff', fontWeight: 'bold', display: 'inline-block', marginTop: '10px' },
+  noFileText: { fontSize: '16px', color: '#888' },
+  commentSection: { marginTop: '20px', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', background: '#f9f9f9' },
+  textArea: { marginTop: '10px', borderRadius: '5px', fontSize: '16px', padding: '10px', width: '100%' },
+  submitButton: { marginTop: '10px', width: '100%', backgroundColor: '#1890ff', borderColor: '#1890ff', fontSize: '16px', fontWeight: 'bold', borderRadius: '5px' },
+  fileTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' },
+};
+
+export default CourseDetails;

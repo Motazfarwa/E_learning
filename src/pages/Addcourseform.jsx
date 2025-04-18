@@ -12,24 +12,28 @@ const Addcourseform = () => {
 
   const onFinish = async (values) => {
     const { machineImage, file, nom, description } = values;
-
+  
     if (!machineImage || machineImage.length === 0) {
       message.error('Please upload a machine image');
       return;
     }
-
+  
     if (!file || file.length === 0) {
       message.error('Please upload a file');
       return;
     }
-
+  
     setLoading(true);
     const formData = new FormData();
     formData.append('nom', nom);
     formData.append('description', description);
     formData.append('courseimagefile', machineImage[0].originFileObj);
-    formData.append('file', file[0].originFileObj);
-
+  
+    // Append each uploaded file (for videos/documents)
+    file.forEach((f) => {
+      formData.append('file', f.originFileObj); // Append each file individually with the same 'file' name
+    });
+  
     try {
       await axios.post('http://localhost:4000/api/courses', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -38,11 +42,12 @@ const Addcourseform = () => {
       form.resetFields();
     } catch (error) {
       console.error('Error:', error);
-      message.error('Failed to add machine');
+      message.error('Failed to add course');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const linkStyle = {
     textDecoration: 'none',
@@ -53,37 +58,38 @@ const Addcourseform = () => {
     borderRadius: '5px',
     transition: '0.3s',
   };
- const role = useContext(RoleContext);
+
+  const role = useContext(RoleContext);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
 
-            {/* Top Navigation */}
+      {/* Top Navigation */}
       <div className="w-full bg-black shadow-md fixed top-0 left-0 z-50 flex items-center justify-between px-6 py-4">
-      <img className="w-13 h-9" src={logo} alt="Logo" />
+        <img className="w-13 h-9" src={logo} alt="Logo" />
   
-  <div className="cursor-pointer flex flex-col space-y-1" onClick={() => setIsOpen(!isOpen)}>
-    <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-    <span className={`block w-8 h-1 bg-white transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} />
-    <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-  </div>
+        <div className="cursor-pointer flex flex-col space-y-1" onClick={() => setIsOpen(!isOpen)}>
+          <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`block w-8 h-1 bg-white transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} />
+          <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+        </div>
       </div>
-          {/* Sidebar Navigation */}
-    <div className={`fixed top-0 left-0 h-full w-64 bg-black p-6 pb-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-64'}`}>
-    <ul className="text-white space-y-12">
-  
-    <li><a href="/Ajoutercour" className="block hover:text-gray-300 font-bold">Ajouter des cours</a></li>
-    <li><a href="/cours/:id" className="block hover:text-gray-300 font-bold">Details de cours</a></li>
-    <li><a href="/getcours" className="block hover:text-gray-300 font-bold">List des cours</a></li>
-    </ul>
-    </div>
+
+      {/* Sidebar Navigation */}
+      <div className={`fixed top-0 left-0 h-full w-64 bg-black p-6 pb-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-64'}`}>
+        <ul className="text-white space-y-12">
+          <li><a href="/Ajoutercour" className="block hover:text-gray-300 font-bold">Ajouter des cours</a></li>
+          <li><a href="/cours/:id" className="block hover:text-gray-300 font-bold">Details de cours</a></li>
+          <li><a href="/getcours" className="block hover:text-gray-300 font-bold">List des cours</a></li>
+        </ul>
+      </div>
+
       <div style={{ width: '100%', maxWidth: '600px', padding: '20px' }}>
         <h2 style={{ textAlign: 'center' }}>Ajouter un nouveau cour</h2>
 
         <Form form={form} onFinish={onFinish} layout="vertical">
           {/* Machine Image Upload */}
           <Form.Item
-     
             name="machineImage"
             rules={[{ required: true, message: 'Machine image is required' }]}
             valuePropName="fileList"
@@ -101,7 +107,7 @@ const Addcourseform = () => {
             </Upload>
           </Form.Item>
 
-          {/* Machine Name */}
+          {/* Course Name */}
           <Form.Item
             label="Nom du cour"
             name="nom"
@@ -119,22 +125,22 @@ const Addcourseform = () => {
             <Input.TextArea rows={4} />
           </Form.Item>
 
-          {/* File Upload */}
+          {/* File Upload for Documents and Videos */}
           <Form.Item
             name="file"
             rules={[{ required: true, message: 'Please upload a file' }]}
             valuePropName="fileList"
             getValueFromEvent={(e) => e?.fileList || []}
           >
-            <Upload beforeUpload={() => false} maxCount={1}>
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            <Upload beforeUpload={() => false} multiple>
+              <Button icon={<UploadOutlined />}>Click to Upload Multiple Files</Button>
             </Upload>
           </Form.Item>
 
           {/* Submit Button */}
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading}>
-              Add Machine
+              Add Course
             </Button>
           </Form.Item>
         </Form>

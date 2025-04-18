@@ -10,7 +10,8 @@ const PaymentForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-   const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
 
   const handleSubmit = async (values) => {
     if (!stripe || !elements) return;
@@ -65,9 +66,7 @@ const PaymentForm = () => {
     <span className={`block w-8 h-1 bg-white transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`} />
     <span className={`block w-8 h-1 bg-white transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
   </div>
-</div>
-
-
+   </div>
      {/* Sidebar Navigation */}
     <div className={`fixed top-0 left-0 h-full w-64 bg-black p-6 pb-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-64'}`}>
     <ul className="text-white space-y-12">
