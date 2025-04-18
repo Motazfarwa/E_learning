@@ -21,9 +21,10 @@ const Login = () => {
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", response.data.role);
+        localStorage.setItem("FullName", response.data.user.FullName);
         navigate("/home");
       }
-      console.log(response.data);
+      console.log('data',response.data);
 
       if(response.data.role === 'ADMIN'){
         navigate('/dashboard');
