@@ -12,7 +12,7 @@ import Coursedetails from './pages/Coursedetails';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
-import MeetingPage from './pages/Meetingpage';
+import MeetingPage from './pages/MeetingPage';
 import ErrorBoundary from './pages/ErrorBoundary';
 
 
