@@ -38,6 +38,18 @@ const Modal = ({ isOpen, onClose, onSubmit, defaultValues, title, roleOptions, i
     }
     setFormError('');
     console.log('Soumission formulaire :', { formData, isEdit });
+
+    const data = new FormData();
+    data.append('FullName', formData.FullName);
+    data.append('email', formData.email);
+    if (!isEdit) {
+      data.append('password', formData.password);
+    }
+    data.append('role', formData.role);
+    if (formData.profileImage) {
+      data.append('profileImage', formData.profileImage);
+    }
+    
     onSubmit(formData);
     // Réinitialiser le formulaire
     setFormData({
@@ -107,7 +119,8 @@ const Modal = ({ isOpen, onClose, onSubmit, defaultValues, title, roleOptions, i
           <div className="mb-4">
             <label className="block text-gray-700">Image de profil (URL)</label>
             <input
-              type="text"
+              type="file"
+              accept="image/*"
               value={formData.profileImage}
               onChange={(e) => setFormData({ ...formData, profileImage: e.target.value })}
               className="w-full p-2 border rounded"
@@ -140,7 +153,7 @@ const DataTable = ({ role, title }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [error, setError] = useState(null);
-  const roleOptions = ['apprenant', 'instructeur', 'expert'];
+  const roleOptions = ['APPRENANT', 'INSTRUCTEUR', 'EXPERT'];
 
   // Charger les données
   useEffect(() => {

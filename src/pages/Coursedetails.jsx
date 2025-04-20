@@ -2,7 +2,7 @@ import React, {  useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import logo from "../assets/51031-removebg-preview.png";
 
-const CourseDetails = () => {
+const Coursedetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [machine, setMachine] = useState(null);  
@@ -96,4 +96,4 @@ const CourseDetails = () => {
   
 };
 
-export default Coursedetails;
+export default Coursedetails ;
