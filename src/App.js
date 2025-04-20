@@ -12,22 +12,18 @@ import Coursedetails from './pages/Coursedetails';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
-import Meeting from './pages/Meetingpage';
-import MeetingPage from './pages/Meetingpage';
-import ErrorBoundary from 'antd/es/alert/ErrorBoundary';
+import React, { useState } from "react";
+import Meeting from './components/Meeting';
+
+
 
 // Your Stripe publishable key (replace with your own key)
-const stripePromise = loadStripe('pk_test_51R0PabHGa0qYa3Mxv7Tf3cf2SNBVFAaf2H4IuXlsTDAZ9jFO4NTvj699fmbTSAEzjpugpWID9eaPv2IoqjKMEzAe00xug8QopQ');
+const stripePromise = loadStripe('pk_test_51PFIvmRsp6m9X8kfwMev0UG3kepv04iTwrVtDodndQOMD4YspYgN424hpZ8i36gwb0CMldjLvS8gtS2YeguA21Cb00twxbZdDL');
 
 function App() {
-  
   return (
-    
-    
   <RoleProvider>
-  <div className="App">
-      <Meeting />
-  </div>
+ 
   <div className=" font-Poppins bg-Solitude">
   <Router>
   
@@ -44,19 +40,6 @@ function App() {
   <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><Dashboard /></ProtectedRoute>} />
   <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Addcourseform /></ProtectedRoute>} />
   <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
-   {/* Add ErrorBoundary INSIDE ProtectedRoute */}
-  
-   <Route 
-                path="/meetings/:meetingId" 
-                element={
-                  <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
-                    <ErrorBoundary> {/* Specific boundary for meeting page */}
-                      <MeetingPage />
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                } 
-              />
-
   <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
   
   <Route
