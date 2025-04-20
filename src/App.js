@@ -12,6 +12,7 @@ import Coursedetails from './pages/Coursedetails';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
+import MeetingPage from './pages/MeetingPage';
 import React, { useState } from "react";
 import Meeting from './components/Meeting';
 
