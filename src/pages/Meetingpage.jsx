@@ -5,7 +5,7 @@ import Peer from 'peerjs';
 import axios from 'axios';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { formatTime, calculateTimeLeft } from '../components/utils/timeUtils';
+import { formatTime, calculateTimeLeft } from '../utils/timeUtils';
 
 const MeetingPage = () => {
   const { meetingId } = useParams();
