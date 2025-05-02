@@ -26,6 +26,7 @@ const PaymentForm = () => {
         currency: 'usd',
         description: values.description
       });
+      console.log('client secret', clientSecret);
 
       // 2. Confirm payment with Stripe
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
