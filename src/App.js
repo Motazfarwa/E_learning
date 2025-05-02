@@ -15,6 +15,7 @@ import PaymentForm from './pages/Paiement';
 import MeetingPage from './pages/MeetingPage';
 import React from "react"; // Remove unused imports
 import ErrorBoundaryWrapper from './pages/ErrorBoundary';
+import ProfilePage from './pages/Profilepage';
 
 
 const stripePromise = loadStripe('pk_test_51PFIvmRsp6m9X8kfwMev0UG3kepv04iTwrVtDodndQOMD4YspYgN424hpZ8i36gwb0CMldjLvS8gtS2YeguA21Cb00twxbZdDL');
@@ -53,6 +54,14 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['APPRENANT']}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
     </RoleProvider>
