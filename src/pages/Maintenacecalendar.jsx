@@ -28,7 +28,7 @@ const CalendarComponent = () => {
 
         const meetingEvents = meetingsRes.data.map(meeting => {
           return {
-            id: meeting.meetingId, // used for dynamic routing
+            id: meeting._id, // instead of meeting.meetingId
             title: `Meeting with Learner ${meeting.learner}`,
             start: meeting.startTime,
             end: meeting.endTime,
@@ -55,26 +55,36 @@ const CalendarComponent = () => {
         endTime: endTime.toISOString(),
         duration: values.duration || 30,
       };
-
+  
       const response = await axios.post(MEETINGS_API, meetingData);
+      const { _id, learner, startTime: newStart, endTime: newEnd } = response.data;
 
-      setEvents(prev => [...prev, {
-        id: response.data.meetingId,
-        title: `Meeting with ${response.data.learner}`,
-        start: response.data.startTime,
-        end: response.data.endTime,
-        color: '#36D399',
-      }]);
+      setEvents(prev => [
+        ...prev,
+        {
+          id: _id,
+          title: `Meeting with ${learner}`,
+          start: newStart,
+          end: newEnd,
+          color: '#36D399',
+        }
+      ]);
 
       message.success('Meeting scheduled successfully!');
       form.resetFields();
+  
+
+  
+      // OR if you want to open the actual video meeting URL:
+      // window.open(meetingUrl, '_blank');
+  
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to schedule meeting');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Layout style={{ height: "100vh" }}>
       <Header style={{ backgroundColor: "#001529", padding: "0 20px" }}>
@@ -94,6 +104,7 @@ const CalendarComponent = () => {
               const meetingId = info.event.id;
               navigate(`/meetings/${meetingId}`);
             }}
+            
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',

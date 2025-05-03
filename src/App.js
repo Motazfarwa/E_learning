@@ -15,6 +15,7 @@ import PaymentForm from './pages/Paiement';
 import MeetingPage from './pages/Meetingpage';
 import ErrorBoundary from './pages/ErrorBoundary';
 import Calendar from './pages/Maintenacecalendar';
+import Apprenantcalendar from './pages/Apprenantcalendar';
 
 
 // Your Stripe publishable key (replace with your own key)
@@ -35,7 +36,7 @@ function App() {
    <Route path="/register" element={<Register />} />
 
   {/* Protected Routes - Role Based Access */}
-  <Route path="/home" element={<ProtectedRoute allowedRoles={['INSTRUCTEUR']}><Template /></ProtectedRoute>} />
+  <Route path="/home" element={<ProtectedRoute allowedRoles={['INSTRUCTEUR','ADMIN','APPRENANT',  ]}><Template /></ProtectedRoute>} />
   <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><Dashboard /></ProtectedRoute>} />
   <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Addcourseform /></ProtectedRoute>} />
   <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
@@ -53,6 +54,7 @@ function App() {
   <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
   
   <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
+  <Route path="/studentcalendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT']}><Apprenantcalendar /></ProtectedRoute>} />
   
   <Route
   path="/payment"

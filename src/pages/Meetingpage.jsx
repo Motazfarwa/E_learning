@@ -21,9 +21,13 @@ const MeetingPage = () => {
   const peerRef = useRef(null);
   const socketRef = useRef(null);
   const [formattedTime, setFormattedTime] = useState('00:00'); // For formatted time (mm:ss)
-
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertPlayed, setAlertPlayed] = useState(false); 
   // useNavigate hook for redirection
   const navigate = useNavigate();
+
+
+
 
   useEffect(() => {
     const initializeMeeting = async () => {
@@ -105,23 +109,40 @@ const MeetingPage = () => {
     const interval = setInterval(() => {
       if (meeting?.endTime) {
         const { hours, minutes, seconds, totalSeconds } = calculateTimeLeft(meeting.endTime);
-        setTimeLeft(totalSeconds); // Store total seconds for progress bar calculation
+        
+        // Add these logs for debugging
+        console.log('--- Time Calculation ---');
+        console.log('Raw endTime:', meeting.endTime);
+        console.log('Calculated totalSeconds:', totalSeconds);
+        console.log('Current timeLeft state:', timeLeft);
+  
+        setTimeLeft(totalSeconds);
         setFormattedTime(formatTime({ hours, minutes, seconds }));
   
-        // Check if the time is up
-        if (totalSeconds <= 0 && !meetingEnded) {
-          setMeetingEnded(true);
-          
-          // Close the meeting and navigate to another page
+        if (totalSeconds <= 0) {
+          console.log('🚨 Meeting time expired - navigating away');
           closeMeeting();
-          setTimeout(() => navigate('/'), 1000); // Adding a delay to ensure the meeting is closed before navigation
+          navigate('/home');
+          return;
+        }
+  
+        if (totalSeconds <= 40 && !alertPlayed) {
+          console.log('🔔 40-second warning triggered at:', totalSeconds, 'seconds');
+          const utterance = new SpeechSynthesisUtterance(
+            `Your meeting is about to end. You have ${totalSeconds} seconds left.`
+          );
+          speechSynthesis.speak(utterance);
+          setAlertPlayed(true);
+          setShowAlert(true);
         }
       }
     }, 1000);
   
-    // Cleanup the interval when the component is unmounted
-    return () => clearInterval(interval);
-  }, [meeting?.endTime, meetingEnded, navigate]); // Re-run when the endTime changes
+    return () => {
+      console.log('🧹 Cleaning up time interval');
+      clearInterval(interval);
+    };
+  }, [meeting?.endTime, navigate, alertPlayed]);
   
   const closeMeeting = () => {
     if (peerRef.current) peerRef.current.destroy();
@@ -167,6 +188,22 @@ const MeetingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+               {showAlert && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl text-center text-black">
+            <h2 className="text-2xl font-bold mb-4">Time Alert!</h2>
+            <p className="text-lg mb-4">
+              Your meeting is about to end. You have 40 seconds left.
+            </p>
+            <button
+              onClick={() => setShowAlert(false)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header Section */}
       <header className="p-4 flex justify-between items-center bg-black/20">
         <h1 className="text-2xl font-bold">
@@ -287,6 +324,8 @@ const MeetingPage = () => {
               </svg>
             </button>
           </div>
+
+ 
         </div>
       </div>
     </div>
