@@ -31,6 +31,18 @@ const PaymentForm = () => {
 
     setLoading(true);
     setError('');
+<<<<<<< HEAD
+=======
+    
+    try {
+      // 1. Create Payment Intent on backend
+      const { data: { clientSecret } } = await axios.post('http://localhost:4000/api/create-payment-intent', {
+        amount: values.amount * 100, // Convert to cents
+        currency: 'usd',
+        description: values.description
+      });
+      console.log('client secret', clientSecret);
+>>>>>>> 196da81653af86ca12f9682d46bb5cc04e061311
 
     try {
       const token = localStorage.getItem('token');

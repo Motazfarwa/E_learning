@@ -11,17 +11,29 @@
     "@mui/material": "^7.0.2",
     "@react-spring/web": "^9.7.5",
     "@stripe/react-stripe-js": "^3.3.0",
+
     "@tensorflow-models/toxicity": "^1.2.2",
     "@tensorflow/tfjs": "^4.22.0",
+
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
-    "antd": "^5.24.3",
-    "axios": "^1.8.2",
+
+    
     "chart.js": "^4.4.9",
-    "framer-motion": "^12.4.7",
+    
     "git-filter-repo": "^0.0.30",
+    "antd": "^5.24.2",
+    "axios": "^1.9.0",
+    "framer-motion": "^12.4.7",
+    "fullcalendar": "^6.1.17",
+
     "install": "^0.13.0",
     "npm": "^10.9.2",
     "peerjs": "^1.5.4",

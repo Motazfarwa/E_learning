@@ -12,10 +12,16 @@ import Coursedetails from './pages/Coursedetails';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
+<<<<<<< HEAD
 import MeetingPage from './pages/MeetingPage';
 import React from "react"; // Remove unused imports
 import ErrorBoundaryWrapper from './pages/ErrorBoundary';
 import ProfilePage from './pages/Profilepage';
+=======
+import MeetingPage from './pages/Meetingpage';
+import ErrorBoundary from './pages/ErrorBoundary';
+import Calendar from './pages/Maintenacecalendar';
+>>>>>>> 196da81653af86ca12f9682d46bb5cc04e061311
 
 
 const stripePromise = loadStripe('pk_test_51R0PabHGa0qYa3Mxv7Tf3cf2SNBVFAaf2H4IuXlsTDAZ9jFO4NTvj699fmbTSAEzjpugpWID9eaPv2IoqjKMEzAe00xug8QopQ');
@@ -54,6 +60,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+<<<<<<< HEAD
               <Route
             path="/profile"
             element={
@@ -66,6 +73,28 @@ function App() {
       </div>
     </RoleProvider>
   );  
+=======
+  <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
+  
+  <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
+  
+  <Route
+  path="/payment"
+  element={
+    <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+      <Elements stripe={stripePromise}>
+        <PaymentForm />
+      </Elements>
+    </ProtectedRoute>
+  }
+/>
+
+  </Routes>
+  </Router>
+  </div>
+  </RoleProvider>
+  );   
+>>>>>>> 196da81653af86ca12f9682d46bb5cc04e061311
 }
 
 export default App;

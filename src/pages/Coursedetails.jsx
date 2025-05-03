@@ -33,7 +33,7 @@ const CourseDetails = () => {
         setLoading(false);
       });
 
-    axios.get(`http://localhost:4000/api/courses/${id}/comments`)
+    axios.get(`http://localhost:4000/api/${id}/comments`)
       .then((response) => setComments(response.data))
       .catch(() => console.error("Error fetching comments"));
   }, [id]);
@@ -44,12 +44,12 @@ const CourseDetails = () => {
   
     const newCommentData = { text: newComment, type, userId: fullname}; // Include userId
   
-    axios.post(`http://localhost:4000/api/courses/${id}/comments`, newCommentData, { withCredentials: true })
+    axios.post(`http://localhost:4000/api/${id}/comments`, newCommentData, { withCredentials: true })
       .then(() => {
         setNewComment("");
   
         // Fetch updated comments
-        axios.get(`http://localhost:4000/api/courses/${id}/comments`)
+        axios.get(`http://localhost:4000/api/${id}/comments`)
           .then((response) => setComments(response.data))
           .catch(() => console.error("Error fetching updated comments"));
       })
