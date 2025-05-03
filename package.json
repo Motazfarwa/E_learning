@@ -11,6 +11,8 @@
     "@mui/material": "^7.0.2",
     "@react-spring/web": "^9.7.5",
     "@stripe/react-stripe-js": "^3.3.0",
+    "@tensorflow-models/toxicity": "^1.2.2",
+    "@tensorflow/tfjs": "^4.22.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

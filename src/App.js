@@ -18,7 +18,7 @@ import ErrorBoundaryWrapper from './pages/ErrorBoundary';
 import ProfilePage from './pages/Profilepage';
 
 
-const stripePromise = loadStripe('pk_test_51PFIvmRsp6m9X8kfwMev0UG3kepv04iTwrVtDodndQOMD4YspYgN424hpZ8i36gwb0CMldjLvS8gtS2YeguA21Cb00twxbZdDL');
+const stripePromise = loadStripe('pk_test_51R0PabHGa0qYa3Mxv7Tf3cf2SNBVFAaf2H4IuXlsTDAZ9jFO4NTvj699fmbTSAEzjpugpWID9eaPv2IoqjKMEzAe00xug8QopQ');
 
 function App() {
   return (
