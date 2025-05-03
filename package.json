@@ -21,6 +21,7 @@
     "axios": "^1.8.2",
     "chart.js": "^4.4.9",
     "framer-motion": "^12.4.7",
+    "git-filter-repo": "^0.0.30",
     "install": "^0.13.0",
     "npm": "^10.9.2",
     "peerjs": "^1.5.4",
