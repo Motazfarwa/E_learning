@@ -14,6 +14,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from './pages/Paiement';
 import MeetingPage from './pages/Meetingpage';
 import ErrorBoundary from './pages/ErrorBoundary';
+import Calendar from './pages/Maintenacecalendar';
 
 
 // Your Stripe publishable key (replace with your own key)
@@ -50,6 +51,8 @@ function App() {
                 } 
               />
   <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
+  
+  <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
   
   <Route
   path="/payment"

@@ -1,0 +1,61 @@
+/* Container for the entire layout */
+.calendar-container-wrapper {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+  }
+  
+  /* FullCalendar container styling */
+  .calendar-container {
+    flex: 1;
+ /* Set maximum width for the calendar */
+    margin-right: 10px; /* Add space between calendar and form */
+  }
+  
+  /* Maintenance form styling */
+  .form-container {
+    flex: 1;
+    max-width: 30%; /* Set maximum width for the form */
+    min-width: 300px; /* Ensure the form doesn't shrink too much */
+    background-color: #f7f7f7;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  .footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #072b2c;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    margin-top: 200px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .fc-day-number {
+    color: #333; /* Change the color of the day number */
+  }
+  
+  .fc-day:hover {
+    background-color: #e0e0e0; /* Change background color on hover */
+  }
+  
+  
+  /* Responsive behavior for small screens */
+  @media (max-width: 768px) {
+    .calendar-container-wrapper {
+      flex-direction: column; /* Stack the calendar and form on top of each other */
+    }
+  
+    .calendar-container {
+      max-width: 100%;
+      margin-right: 0;
+    }
+  
+    .form-container {
+      max-width: 100%;
+    }
+  }
+  
