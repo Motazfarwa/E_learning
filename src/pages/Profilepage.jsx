@@ -1,205 +1,232 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { FaEdit, FaBars } from 'react-icons/fa';
-import { Card, Button, Input, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { RoleContext } from './RoleContext';
-import { useNavigate } from 'react-router-dom';
+import { Layout, Menu, Card, Input, Button, message, Avatar, Upload } from 'antd';
+import { HomeOutlined, BookOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons';
 
-const API_BASE_URL = 'http://localhost:4000/api';
+const { Header, Sider, Content } = Layout;
+const { TextArea } = Input;
 
 const ProfilePage = () => {
-  const { user, setUser } = useContext(RoleContext);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    FullName: user?.FullName || '',
-    email: user?.email || '',
+    FullName: '',
+    bio: '',
+    skills: '',
     profileImage: null,
   });
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const fullname = localStorage.getItem('FullName');
 
-  // Débogage : Afficher la valeur de user
+  // Charger le profil au montage du composant
   useEffect(() => {
-    console.log('RoleContext user:', user);
-  }, [user]);
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Aucun token d\'authentification trouvé. Veuillez vous connecter.');
+          return;
+        }
+        const response = await axios.get('http://localhost:4000/api/users/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUser(response.data);
+        setFormData({
+          FullName: response.data.FullName || '',
+          bio: response.data.profile.bio || '',
+          skills: response.data.profile.skills?.join(', ') || '',
+          profileImage: null,
+        });
+      } catch (err) {
+        setError(err.response?.data?.error || 'Erreur lors du chargement du profil');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  // Gérer les changements dans les champs du formulaire
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleEditSubmit = async () => {
+  // Gérer le changement de l'image
+  const handleImageChange = ({ file }) => {
+    setFormData({ ...formData, profileImage: file });
+  };
+
+  // Soumettre les modifications du profil
+  const handleSubmit = async () => {
+    if (!formData.FullName.trim()) {
+      message.warning('Veuillez entrer un nom complet');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     const data = new FormData();
     data.append('FullName', formData.FullName);
-    data.append('email', formData.email);
+    data.append('bio', formData.bio);
+    if (['INSTRUCTEUR', 'EXPERT'].includes(user?.role)) {
+      const skillsArray = formData.skills
+        .split(',')
+        .map((skill) => skill.trim())
+        .filter((skill) => skill);
+      data.append('skills', JSON.stringify(skillsArray));
+    }
     if (formData.profileImage) {
       data.append('profileImage', formData.profileImage);
     }
 
     try {
-      const response = await axios.put(`${API_BASE_URL}/users/${user._id}`, data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      const token = localStorage.getItem('token');
+      if (!token) {
+        message.error('Aucun token d\'authentification trouvé. Veuillez vous connecter.');
+        return;
+      }
+      const response = await axios.put('http://localhost:4000/api/users/profile', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
       setUser(response.data);
-      setIsEditing(false);
-      setError(null);
+      setFormData({
+        FullName: response.data.FullName || '',
+        bio: response.data.profile.bio || '',
+        skills: response.data.profile.skills?.join(', ') || '',
+        profileImage: null,
+      });
+      message.success('Profil mis à jour avec succès !');
     } catch (err) {
-      console.error('Erreur lors de la mise à jour du profil :', err);
-      setError('Erreur lors de la mise à jour du profil');
+      message.error(err.response?.data?.error || 'Erreur lors de la mise à jour du profil');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Afficher un message de chargement ou d'erreur si user est null
-  if (!user) {
-    return <div className="text-center p-6">Chargement du profil...</div>;
+  if (loading) {
+    return <p style={{ textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }}>Chargement du profil...</p>;
   }
-
-  // Vérifier si l'utilisateur est un APPRENANT
-  if (user.role !== 'APPRENANT') {
-    return <div className="text-center p-6 text-red-600">Accès réservé aux apprenants</div>;
+  if (error) {
+    return <p style={{ textAlign: 'center', color: 'red', fontSize: '18px' }}>{error}</p>;
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 w-64 bg-blue-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out z-50
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-          md:static md:translate-x-0 md:w-64`}
-      >
-        <div className="p-4 text-2xl font-bold flex justify-between items-center">
-          E-Learning
-          <button className="md:hidden text-white" onClick={toggleSidebar}>
-            <FaBars className="w-6 h-6" />
-          </button>
-        </div>
-        <nav className="flex-1 p-2">
-          <div
-            onClick={() => {
-              navigate('/getcours');
-              setIsSidebarOpen(false);
-            }}
-            className="p-3 rounded-lg cursor-pointer hover:bg-blue-700"
-          >
-            Cours
-          </div>
-          <div
-            onClick={() => {
-              navigate('/profile');
-              setIsSidebarOpen(false);
-            }}
-            className="p-3 rounded-lg cursor-pointer bg-blue-600"
-          >
-            Profil
-          </div>
-        </nav>
-      </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} style={styles.sider}>
+        <div style={styles.logo}>E-learning</div>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['3']}>
+          <Menu.Item key="1" icon={<HomeOutlined />}>
+            <Link to="/">Accueil</Link>
+          </Menu.Item>
+          <Menu.Item key="2" icon={<BookOutlined />}>
+            <Link to="/courses">Cours</Link>
+          </Menu.Item>
+          <Menu.Item key="3" icon={<UserOutlined />}>
+            <Link to="/profile">Profil</Link>
+          </Menu.Item>
+        </Menu>
+      </Sider>
 
-      {/* Overlay pour mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={toggleSidebar}
-        ></div>
-      )}
-
-      {/* Contenu principal */}
-      <div className="flex-1 p-6">
-        <button
-          className="md:hidden p-2 text-gray-800 focus:outline-none"
-          onClick={toggleSidebar}
-          aria-label={isSidebarOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-        >
-          <FaBars className="w-6 h-6" />
-        </button>
-
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Profil de l'Apprenant</h1>
-
-        <Card className="shadow-lg max-w-2xl mx-auto" style={{ borderRadius: '12px' }}>
-          {error && <p className="text-red-600 mb-4">{error}</p>}
-          {!isEditing ? (
-            <div className="flex flex-col items-center">
-              {user?.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt="Profil"
-                  className="w-24 h-24 rounded-full object-cover mb-4"
-                  onError={(e) => (e.target.src = '/placeholder-profile.png')}
+      <Layout>
+        <Header style={styles.header}>Mon Profil</Header>
+        <Content style={styles.content}>
+          <Card title={`Profil de ${fullname}`} bordered={false} style={styles.card}>
+            <div style={styles.profileContainer}>
+              {user.profileImage ? (
+                <Avatar
+                  size={128}
+                  src={`http://localhost:4000/Uploads/${user.profileImage}`}
+                  style={styles.avatar}
+                  onError={(e) => (e.target.src = 'https://via.placeholder.com/128')}
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                  <span className="text-gray-500">Aucune image</span>
-                </div>
+                <Avatar size={128} icon={<UserOutlined />} style={styles.avatar} />
               )}
-              <h2 className="text-xl font-semibold">{user?.FullName || 'Non défini'}</h2>
-              <p className="text-gray-600">{user?.email}</p>
-              <p className="text-gray-600 capitalize">{user?.role}</p>
+              <p style={styles.info}><strong>Rôle :</strong> {user.role}</p>
+              <p style={styles.info}><strong>Email :</strong> {user.email}</p>
+            </div>
+
+            <div style={styles.formContainer}>
+              <Input
+                name="FullName"
+                value={formData.FullName}
+                onChange={handleInputChange}
+                placeholder="Nom complet"
+                style={styles.input}
+              />
+              <TextArea
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                placeholder="Bio"
+                rows={4}
+                style={styles.textArea}
+              />
+              {['INSTRUCTEUR', 'EXPERT'].includes(user?.role) && (
+                <Input
+                  name="skills"
+                  value={formData.skills}
+                  onChange={handleInputChange}
+                  placeholder="Compétences (séparées par des virgules)"
+                  style={styles.input}
+                />
+              )}
+              <Upload
+                name="profileImage"
+                accept="image/jpeg,image/png"
+                beforeUpload={() => false} // Empêche l'upload automatique
+                onChange={handleImageChange}
+                showUploadList={false}
+                style={styles.upload}
+              >
+                <Button icon={<UploadOutlined />} style={styles.uploadButton}>
+                  Télécharger une image de profil
+                </Button>
+              </Upload>
+              {formData.profileImage && (
+                <p style={styles.fileName}>Fichier sélectionné : {formData.profileImage.name}</p>
+              )}
               <Button
                 type="primary"
-                icon={<FaEdit />}
-                className="mt-4"
-                onClick={() => setIsEditing(true)}
+                onClick={handleSubmit}
+                loading={isSubmitting}
+                style={styles.submitButton}
               >
-                Modifier le profil
+                Mettre à jour le profil
               </Button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Nom complet</label>
-                <Input
-                  value={formData.FullName}
-                  onChange={(e) => setFormData({ ...formData, FullName: e.target.value })}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Email</label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Image de profil</label>
-                <Upload
-                  beforeUpload={() => false}
-                  onChange={(info) => setFormData({ ...formData, profileImage: info.file })}
-                  accept="image/*"
-                  showUploadList={false}
-                >
-                  <Button icon={<UploadOutlined />}>Choisir une image</Button>
-                </Upload>
-                {formData.profileImage && (
-                  <p className="text-gray-600 mt-2">{formData.profileImage.name}</p>
-                )}
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button onClick={() => setIsEditing(false)}>Annuler</Button>
-                <Button type="primary" onClick={handleEditSubmit}>
-                  Enregistrer
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* Section pour les cours suivis */}
-        <Card
-          title="Cours suivis"
-          className="shadow-lg max-w-2xl mx-auto mt-6"
-          style={{ borderRadius: '12px' }}
-        >
-          <p className="text-gray-600">
-            (À implémenter : Liste des cours suivis par l'apprenant)
-          </p>
-        </Card>
-      </div>
-    </div>
+          </Card>
+        </Content>
+      </Layout>
+    </Layout>
   );
+};
+
+const styles = {
+  sider: { background: '#001529', width: 240 },
+  logo: { color: '#fff', fontSize: '24px', fontWeight: 'bold', textAlign: 'center', padding: '20px' },
+  header: { background: '#1890ff', color: '#fff', fontSize: '24px', textAlign: 'center', padding: '15px' },
+  content: { margin: '20px', padding: '20px', background: '#fff', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' },
+  card: { textAlign: 'center', boxShadow: '0 6px 12px rgba(0,0,0,0.1)', borderRadius: '10px', padding: '20px' },
+  profileContainer: { marginBottom: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  avatar: { marginBottom: '15px' },
+  info: { fontSize: '16px', color: '#333', marginBottom: '10px' },
+  formContainer: { maxWidth: '600px', margin: '0 auto' },
+  input: { marginBottom: '15px', borderRadius: '5px', fontSize: '16px', padding: '10px' },
+  textArea: { marginBottom: '15px', borderRadius: '5px', fontSize: '16px', padding: '10px' },
+  upload: { marginBottom: '15px' },
+  uploadButton: { width: '100%', borderRadius: '5px', fontSize: '16px' },
+  fileName: { fontSize: '14px', color: '#555', marginBottom: '15px' },
+  submitButton: { width: '100%', backgroundColor: '#1890ff', borderColor: '#1890ff', fontSize: '16px', fontWeight: 'bold', borderRadius: '5px' }
 };
 
 export default ProfilePage;
