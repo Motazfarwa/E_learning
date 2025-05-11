@@ -21,6 +21,7 @@ import Calendar from './pages/Maintenacecalendar';
 import ProfilePage from './pages/ProfilePage';
 
 import Apprenantcalendar from './pages/Apprenantcalendar';
+import HomePage from './pages/HomePage';
 
 
 
@@ -34,10 +35,10 @@ function App() {
       <div className="font-Poppins bg-Solitude">
         {/* Remove the <Router> component here */}
         <Routes>
-          <Route path="/" element={<Navigate to="/register" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/home" element={<ProtectedRoute allowedRoles={[ 'ADMIN' ,'INSTRUCTEUR']}><Template /></ProtectedRoute>} />
+          
           <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><Dashboard /></ProtectedRoute>} />
           <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Addcourseform /></ProtectedRoute>} />
           <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT' , 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
