@@ -8,24 +8,42 @@
 // utils/timeUtils.js
 
 export const calculateTimeLeft = (endTime) => {
-  const now = new Date();
-  const meetingEndTime = new Date(endTime);  // Convert the string date to a Date object
+  try {
+    const now = new Date();
+    const meetingEndTime = new Date(endTime);
 
-  // Calculate the time difference in milliseconds
-  const timeDifference = meetingEndTime - now;
+    // Validate the date
+    if (isNaN(meetingEndTime.getTime())) {
+      throw new Error('Invalid endTime format');
+    }
 
-  // If the meeting has ended, return 0 hours, 0 minutes, and 0 seconds
-  if (timeDifference <= 0) {
-    return { hours: 0, minutes: 0, seconds: 0 };
+    const timeDifference = meetingEndTime - now;
+
+    if (timeDifference <= 0) {
+      return { 
+        totalSeconds: 0,  // Add this
+        hours: 0, 
+        minutes: 0, 
+        seconds: 0 
+      };
+    }
+
+    const totalSeconds = Math.floor(timeDifference / 1000);
+    return {
+      totalSeconds,  // Include this in the return
+      hours: Math.floor(totalSeconds / 3600),
+      minutes: Math.floor((totalSeconds % 3600) / 60),
+      seconds: totalSeconds % 60
+    };
+  } catch (error) {
+    console.error('Time calculation error:', error);
+    return { 
+      totalSeconds: 0,  // Ensure this exists
+      hours: 0, 
+      minutes: 0, 
+      seconds: 0 
+    };
   }
-
-  // Calculate hours, minutes, and seconds
-  const totalSeconds = Math.floor(timeDifference / 1000);
-  const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
-  const minutes = Math.floor((totalSeconds % 3600) / 60); // 60 seconds in a minute
-  const seconds = totalSeconds % 60; // Remaining seconds
-
-  return { hours, minutes, seconds };
 };
 
   
