@@ -59,19 +59,24 @@ const Apprenantcalendar = () => {
     }
   };
 
-  const handleStatusUpdate = async (status) => {
-    try {
-      setUpdating(true);
-      await axios.put(`${MEETINGS_API}/${selectedMeeting._id}/status`, { status });
-      message.success(`Meeting ${status}!`);
-      await fetchMeetings();
-      setIsModalVisible(false);
-    } catch (error) {
-      message.error(`Failed to ${status} meeting`);
-    } finally {
-      setUpdating(false);
-    }
-  };
+const handleStatusUpdate = async (status) => {
+  try {
+    setUpdating(true);
+    const learnerEmail = localStorage.getItem('email'); // Assuming you stored it like this
+    await axios.put(`${MEETINGS_API}/${selectedMeeting._id}/status`, {
+      status,
+      learner: learnerEmail,
+    });
+    message.success(`Meeting ${status}!`);
+    await fetchMeetings();
+    setIsModalVisible(false);
+  } catch (error) {
+    message.error(`Failed to ${status} meeting`);
+  } finally {
+    setUpdating(false);
+  }
+};
+
 
   return (
     <Layout style={{ height: "100vh" }}>

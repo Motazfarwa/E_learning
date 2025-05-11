@@ -39,22 +39,28 @@ const CourseDetails = () => {
   }, [id]);
   const fullname = localStorage.getItem('FullName')
 
-  const handleCommentSubmit = (type) => {
-    if (!newComment.trim()) return;
-  
-    const newCommentData = { text: newComment, type, userId: fullname}; // Include userId
-  
-    axios.post(`http://localhost:4000/api/${id}/comments`, newCommentData, { withCredentials: true })
-      .then(() => {
-        setNewComment("");
-  
-        // Fetch updated comments
-        axios.get(`http://localhost:4000/api/${id}/comments`)
-          .then((response) => setComments(response.data))
-          .catch(() => console.error("Error fetching updated comments"));
-      })
-      .catch(() => console.error("Error posting comment"));
-  };
+const handleCommentSubmit = (type) => {
+  if (!newComment.trim()) return;
+
+  const newCommentData = { text: newComment, type, userId: fullname };
+
+  axios.post(`http://localhost:4000/api/courses/${id}/comments`, newCommentData, { withCredentials: true })
+    .then(() => {
+      setNewComment("");
+
+      axios.get(`http://localhost:4000/api/courses/${id}/comments`)
+        .then((response) => setComments(response.data))
+        .catch(() => console.error("Error fetching updated comments"));
+    })
+    .catch((error) => {
+      if (error.response && error.response.data.message) {
+        alert(error.response.data.message); // Show message from backend
+      } else {
+        console.error("Error posting comment");
+      }
+    });
+};
+
   
   if (loading) return <p style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold" }}>Loading course details...</p>;
   if (error) return <p style={{ textAlign: "center", color: "red", fontSize: "18px" }}>{error}</p>;

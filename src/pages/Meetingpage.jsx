@@ -115,21 +115,21 @@ const MeetingPage = () => {
         console.log('Raw endTime:', meeting.endTime);
         console.log('Calculated totalSeconds:', totalSeconds);
         console.log('Current timeLeft state:', timeLeft);
-  
+          console.log('Current  state:', seconds);
         setTimeLeft(totalSeconds);
         setFormattedTime(formatTime({ hours, minutes, seconds }));
   
-        if (totalSeconds <= 0) {
+        if (seconds <= 0) {
           console.log('🚨 Meeting time expired - navigating away');
           closeMeeting();
           navigate('/home');
           return;
         }
   
-        if (totalSeconds <= 40 && !alertPlayed) {
+        if (seconds <= 40 && !alertPlayed) {
           console.log('🔔 40-second warning triggered at:', totalSeconds, 'seconds');
           const utterance = new SpeechSynthesisUtterance(
-            `Your meeting is about to end. You have ${totalSeconds} seconds left.`
+            `Your meeting is about to end. You have ${seconds} seconds left.`
           );
           speechSynthesis.speak(utterance);
           setAlertPlayed(true);
@@ -140,7 +140,7 @@ const MeetingPage = () => {
   
     return () => {
       console.log('🧹 Cleaning up time interval');
-      clearInterval(interval);
+      clearInterval(interval);  
     };
   }, [meeting?.endTime, navigate, alertPlayed]);
   
