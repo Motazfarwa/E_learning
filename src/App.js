@@ -22,6 +22,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import Apprenantcalendar from './pages/Apprenantcalendar';
 import HomePage from './pages/HomePage';
+import CoursesAndExpertsPage from './pages/CoursesAndExpertsPage';
 
 
 
@@ -43,6 +44,7 @@ function App() {
           <Route path="/Ajoutercour" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Addcourseform /></ProtectedRoute>} />
           <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT' , 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
           <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
+          <Route path="/learn" element={<CoursesAndExpertsPage />} />
           <Route
             path="/payment"
             element={
