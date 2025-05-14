@@ -7,8 +7,11 @@ import {
     Navbar,
     Teacher,
   } from "../components/index";
+import ChatApp from "./chatboat";
   
 const Template = ()=> {
+
+  
     return (
       <div className=" font-Poppins bg-Solitude">
         <Navbar />
@@ -18,8 +21,8 @@ const Template = ()=> {
         <About />
     
         <Courses />
-       < Teacher/>
-  
+        <Teacher/>
+        <ChatApp/>
        < Footer/>
   
       </div>

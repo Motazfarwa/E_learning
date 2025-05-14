@@ -16,6 +16,7 @@ import MeetingPage from './pages/Meetingpage';
 import ErrorBoundary from './pages/ErrorBoundary';
 import Calendar from './pages/Maintenacecalendar';
 import Apprenantcalendar from './pages/Apprenantcalendar';
+import ChatApp from './pages/chatboat';
 
 
 // Your Stripe publishable key (replace with your own key)
@@ -55,7 +56,7 @@ function App() {
   
   <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
   <Route path="/studentcalendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT']}><Apprenantcalendar /></ProtectedRoute>} />
-  
+    <Route path="/chatboat" element={<ProtectedRoute allowedRoles={['ADMIN',  'INSTRUCTEUR']}><ChatApp /></ProtectedRoute>} />
   <Route
   path="/payment"
   element={
