@@ -105,50 +105,56 @@ const MeetingPage = () => {
       if (socketRef.current) socketRef.current.disconnect();
     };
   }, [meeting, meetingId]);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (meeting?.endTime) {
-        const { hours, minutes, seconds, totalSeconds } = calculateTimeLeft(meeting.endTime);
-        
-        // Add these logs for debugging
-        console.log('--- Time Calculation ---');
-        console.log('Raw endTime:', meeting.endTime);
-        console.log('Calculated totalSeconds:', totalSeconds);
-        console.log('Current timeLeft state:', timeLeft);
-          console.log('Current  state:', seconds);
-        setTimeLeft(totalSeconds);
-        setFormattedTime(formatTime({ hours, minutes, seconds }));
-  
-        if (seconds <= 0) {
-          console.log('🚨 Meeting time expired - navigating away');
-          closeMeeting();
-          navigate('/home');
-          return;
-        }
-  
-        if (seconds <= 40 && !alertPlayed) {
-          console.log('🔔 40-second warning triggered at:', totalSeconds, 'seconds');
-          const utterance = new SpeechSynthesisUtterance(
-            `Your meeting is about to end. You have ${seconds} seconds left.`
-          );
-          speechSynthesis.speak(utterance);
-          setAlertPlayed(true);
-          setShowAlert(true);
-        }
-      }
-    }, 1000);
-  
-    return () => {
-      console.log('🧹 Cleaning up time interval');
-      clearInterval(interval);  
-    };
-  }, [meeting?.endTime, navigate, alertPlayed]);
-  
-  const closeMeeting = () => {
+
+    const closeMeeting = () => {
     if (peerRef.current) peerRef.current.destroy();
     if (socketRef.current) socketRef.current.disconnect();
   };
   
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (meeting?.endTime) {
+      const { hours, minutes, seconds, totalSeconds } = calculateTimeLeft(meeting.endTime);
+
+      console.log('--- Time Calculation ---');
+      console.log('Raw endTime:', meeting.endTime);
+      console.log('Calculated totalSeconds:', totalSeconds);
+      console.log('Formatted Time:', `${hours}:${minutes}:${seconds}`);
+
+      // Update the formatted time
+      setFormattedTime(formatTime({ hours, minutes, seconds }));
+
+      // ✅ End meeting only when all are exactly zero
+      if (hours === 0 && minutes === 0 && seconds === 0) {
+        console.log('🚨 Meeting time expired - navigating away');
+        closeMeeting();
+        navigate('/home');
+        return;
+      }
+
+      // 🔔 40-second warning
+      if (totalSeconds <= 40 && !alertPlayed) {
+        console.log('🔔 40-second warning triggered at:', totalSeconds);
+        const utterance = new SpeechSynthesisUtterance(
+          `Your meeting is about to end. You have ${totalSeconds} seconds left.`
+        );
+        speechSynthesis.speak(utterance);
+        setAlertPlayed(true);
+        setShowAlert(true);
+      }
+    }
+  }, 1000);
+
+  return () => {
+    console.log('🧹 Cleaning up time interval');
+    clearInterval(interval);
+  };
+}, [meeting?.endTime, navigate, alertPlayed, closeMeeting]);
+
+
+
+  
+
 
   const sendMessage = () => {
     if (message.trim() && !meetingEnded) {
