@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaTrash, FaPlus, FaBars } from 'react-icons/fa';
-import { Card, Statistic, Row, Col, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { FaTrash, FaPlus, FaBars, FaUsers, FaChartBar, FaFileAlt, FaMoneyBillWave, FaUserShield, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { Card, Statistic, Row, Col, Input, Badge } from 'antd';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,8 +15,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import axios from 'axios';
 
-// Enregistrer les composants Chart.js
+// Register Chart.js components
 ChartJS.register(
   ArcElement,
   BarElement,
@@ -27,9 +29,37 @@ ChartJS.register(
   Legend
 );
 
-// URL de base de l'API
+// Base API URL
 const API_BASE_URL = 'http://localhost:4000/api';
 
+// Modern color palette
+const colors = {
+  primary: '#6a11cb',
+  primaryLight: '#805ad5',
+  primaryDark: '#553c9a',
+  secondary: '#8338ec',
+  accent: '#764ba2',
+  background: '#f8f9fa',
+  cardBg: '#ffffff',
+  success: '#38b2ac',
+  error: '#e53e3e',
+  warning: '#dd6b20',
+  info: '#3182ce',
+  text: {
+    primary: '#1a202c',
+    secondary: '#4a5568',
+    light: '#a0aec0',
+  },
+  chart: {
+    primary: '#6a11cb',
+    secondary: '#8338ec',
+    tertiary: '#764ba2',
+    quaternary: '#9f7aea',
+    gradient: ['#764ba2', '#667eea'],
+  },
+};
+
+// CoursesTable Component
 const CoursesTable = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -45,76 +75,99 @@ const CoursesTable = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Erreur lors du chargement des cours :', error);
-        setError('Erreur lors du chargement des cours');
+        console.error('Error loading courses:', error);
+        setError('Error loading courses');
         setLoading(false);
       });
   }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm('Voulez-vous vraiment supprimer ce cours ?')) {
+    if (window.confirm('Are you sure you want to delete this course?')) {
       try {
         await axios.delete(`${API_BASE_URL}/courses/${id}`);
         setCourses(courses.filter((course) => course._id !== id));
         setFilteredCourses(filteredCourses.filter((course) => course._id !== id));
       } catch (err) {
-        console.error('Erreur lors de la suppression du cours :', err);
-        setError('Erreur lors de la suppression du cours');
+        console.error('Error deleting course:', err);
+        setError('Error deleting course');
       }
     }
   };
 
-  if (loading) return <p className="text-center text-gray-600">Chargement des cours...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
+        <p className="text-purple-600 font-medium">Loading courses...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Liste des Cours</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg shadow">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-3 text-left text-gray-600 font-semibold">Nom</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Description</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Fichiers</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Commentaires</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCourses.length > 0 ? (
-              filteredCourses.map((course) => (
-                <tr key={course._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{course.nom}</td>
-                  <td className="p-3">{course.description.substring(0, 50)}...</td>
-                  <td className="p-3">{course.file.length} fichier(s)</td>
-                  <td className="p-3">{course.comments.length}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleDelete(course._id)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Supprimer"
-                    >
-                      <FaTrash />
-                    </button>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-800">Courses List</h2>
+        <button className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md">
+          <FaPlus className="mr-2" /> Add Course
+        </button>
+      </div>
+      <div className="overflow-hidden bg-white rounded-xl shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Files</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredCourses.length > 0 ? (
+                filteredCourses.map((course) => (
+                  <tr key={course._id} className="hover:bg-purple-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{course.nom}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500">{course.description.substring(0, 50)}...</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge count={course.file.length} className="bg-purple-500" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge count={course.comments.length} className="bg-blue-500" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleDelete(course._id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                    No courses found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-3 text-center text-gray-500">
-                  Aucun cours trouvé
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 };
 
-// Composant CourseStatistics
+// CourseStatistics Component
 const CourseStatistics = () => {
   const [stats, setStats] = useState({
     totalCourses: 0,
@@ -132,23 +185,32 @@ const CourseStatistics = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Erreur lors du chargement des statistiques des cours :', error);
-        setError('Erreur lors du chargement des statistiques des cours');
+        console.error('Error loading course statistics:', error);
+        setError('Error loading course statistics');
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="text-center text-gray-600">Chargement des statistiques...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
+        <p className="text-purple-600 font-medium">Loading statistics...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
 
   const fileTypeDoughnutData = {
     labels: stats.fileTypeDistribution.map((type) => type._id),
     datasets: [
       {
         data: stats.fileTypeDistribution.map((type) => type.count),
-        backgroundColor: ['#1890ff', '#cf1322', '#faad14'],
-        hoverBackgroundColor: ['#40c4ff', '#ff4560', '#ffc107'],
-        borderWidth: 1
+        backgroundColor: [colors.chart.primary, colors.chart.secondary, colors.chart.tertiary],
+        hoverBackgroundColor: [colors.chart.quaternary, '#9333ea', '#7e22ce'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
       }
     ]
   };
@@ -157,12 +219,12 @@ const CourseStatistics = () => {
     plugins: {
       legend: {
         position: 'bottom',
-        labels: { font: { size: 14 }, color: '#374151' }
+        labels: { font: { size: 12, family: "'Poppins', sans-serif" }, color: colors.text.secondary }
       },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 }
+        backgroundColor: colors.primaryDark,
+        titleFont: { size: 14, family: "'Poppins', sans-serif" },
+        bodyFont: { size: 12, family: "'Poppins', sans-serif" }
       }
     },
     maintainAspectRatio: false,
@@ -173,11 +235,13 @@ const CourseStatistics = () => {
     labels: stats.commentsByCourse.map((course) => course.nom),
     datasets: [
       {
-        label: 'Nombre de commentaires',
+        label: 'Number of Comments',
         data: stats.commentsByCourse.map((course) => course.commentCount),
-        backgroundColor: '#1890ff',
-        borderColor: '#096dd9',
-        borderWidth: 1
+        backgroundColor: colors.chart.primary,
+        borderColor: colors.chart.secondary,
+        borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 40
       }
     ]
   };
@@ -186,30 +250,20 @@ const CourseStatistics = () => {
     scales: {
       y: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Nombre de commentaires',
-          font: { size: 14 },
-          color: '#374151'
-        },
-        ticks: { color: '#374151' }
+        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+        ticks: { color: colors.text.secondary }
       },
       x: {
-        title: {
-          display: true,
-          text: 'Cours',
-          font: { size: 14 },
-          color: '#374151'
-        },
-        ticks: { color: '#374151' }
+        grid: { display: false },
+        ticks: { color: colors.text.secondary }
       }
     },
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 }
+        backgroundColor: colors.primaryDark,
+        titleFont: { size: 14, family: "'Poppins', sans-serif" },
+        bodyFont: { size: 12, family: "'Poppins', sans-serif" }
       }
     },
     maintainAspectRatio: false,
@@ -218,39 +272,49 @@ const CourseStatistics = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Statistiques des Cours</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Course Statistics</h2>
       <Row gutter={[16, 16]}>
         <Col span={12}>
           <Card
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px', textAlign: 'center' }}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <Statistic
-              title="Total des Cours"
-              value={stats.totalCourses}
-              valueStyle={{ color: '#3f8600', fontSize: '2rem', fontWeight: 'bold' }}
-              className="py-4"
-            />
+            <div className="flex items-center justify-center flex-col">
+              <div className="w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-4">
+                <FaFileAlt className="text-2xl text-purple-600" />
+              </div>
+              <Statistic
+                title={<span className="text-gray-500">Total Courses</span>}
+                value={stats.totalCourses}
+                valueStyle={{ color: colors.primary, fontSize: '2.5rem', fontWeight: 'bold' }}
+                className="py-2"
+              />
+            </div>
           </Card>
         </Col>
         <Col span={12}>
           <Card
-            title="Répartition des Types de Fichiers"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
+            title={<span className="text-gray-700 font-medium">File Type Distribution</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Doughnut data={fileTypeDoughnutData} options={doughnutOptions} />
             </div>
           </Card>
         </Col>
         <Col span={24}>
           <Card
-            title="Commentaires par Cours"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
+            title={<span className="text-gray-700 font-medium">Comments per Course</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Bar data={commentsBarData} options={barOptions} />
             </div>
           </Card>
@@ -260,7 +324,7 @@ const CourseStatistics = () => {
   );
 };
 
-// Composant TransactionsTable
+// TransactionsTable Component
 const TransactionsTable = () => {
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -277,13 +341,12 @@ const TransactionsTable = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Erreur lors du chargement des transactions :', error);
-        setError('Erreur lors du chargement des transactions');
+        console.error('Error loading transactions:', error);
+        setError('Error loading transactions');
         setLoading(false);
       });
   }, []);
 
-  // Filtrer les transactions par email
   useEffect(() => {
     if (searchEmail.trim() === '') {
       setFilteredTransactions(transactions);
@@ -296,61 +359,103 @@ const TransactionsTable = () => {
     }
   }, [searchEmail, transactions]);
 
-  if (loading) return <p className="text-center text-gray-600">Chargement des transactions...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
+        <p className="text-purple-600 font-medium">Loading transactions...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Transactions</h2>
-      <div className="mb-4">
-        <Input
-          placeholder="Rechercher par email du client"
-          value={searchEmail}
-          onChange={(e) => setSearchEmail(e.target.value)}
-          className="w-full max-w-md p-2"
-        />
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Transactions</h2>
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <input
+            type="text"
+            placeholder="Search by client email..."
+            value={searchEmail}
+            onChange={(e) => setSearchEmail(e.target.value)}
+            className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-colors shadow-sm"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg shadow">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-3 text-left text-gray-600 font-semibold">ID Paiement</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Montant (USD)</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Devise</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Nom Client</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Email Client</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Statut</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((transaction) => (
-                <tr key={transaction._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{transaction.paymentId}</td>
-                  <td className="p-3">{transaction.amount.toFixed(2)}</td>
-                  <td className="p-3">{transaction.currency.toUpperCase()}</td>
-                  <td className="p-3">{transaction.customerName}</td>
-                  <td className="p-3">{transaction.customerEmail}</td>
-                  <td className="p-3">{transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}</td>
-                  <td className="p-3">{new Date(transaction.createdAt).toLocaleDateString('fr-FR')}</td>
-                </tr>
-              ))
-            ) : (
+      <div className="overflow-hidden bg-white rounded-xl shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan="7" className="p-3 text-center text-gray-500">
-                  Aucune transaction trouvée
-                </td>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment ID</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((transaction) => (
+                  <tr key={transaction._id} className="hover:bg-purple-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{transaction.paymentId}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {transaction.amount.toFixed(2)} {transaction.currency.toUpperCase()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{transaction.customerName}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{transaction.customerEmail}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                        transaction.status === 'completed' 
+                          ? 'bg-green-100 text-green-800' 
+                          : transaction.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}>
+                        {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(transaction.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
+                    No transactions found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 };
 
-// Composant Statistics
+// Statistics Component
 const Statistics = () => {
   const [userStats, setUserStats] = useState({
     totalUsers: 0,
@@ -392,23 +497,32 @@ const Statistics = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Erreur lors du chargement des statistiques :', error);
-        setError('Erreur lors du chargement des statistiques');
+        console.error('Error loading statistics:', error);
+        setError('Error loading statistics');
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="text-center text-gray-600">Chargement des statistiques...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
+        <p className="text-purple-600 font-medium">Loading statistics...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
 
   const userDoughnutData = {
     labels: ['Apprenants', 'Instructeurs', 'Experts'],
     datasets: [
       {
         data: [userStats.apprenants, userStats.instructeurs, userStats.experts],
-        backgroundColor: ['#1890ff', '#cf1322', '#faad14'],
-        hoverBackgroundColor: ['#40c4ff', '#ff4560', '#ffc107'],
-        borderWidth: 1,
+        backgroundColor: [colors.chart.primary, colors.chart.secondary, colors.chart.tertiary],
+        hoverBackgroundColor: [colors.primaryLight, colors.secondary, colors.accent],
+        borderWidth: 2,
+        borderColor: '#ffffff',
       },
     ],
   };
@@ -418,14 +532,14 @@ const Statistics = () => {
       legend: {
         position: 'bottom',
         labels: {
-          font: { size: 14 },
-          color: '#374151',
+          font: { size: 12, family: "'Poppins', sans-serif" },
+          color: colors.text.secondary
         },
       },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 },
+        backgroundColor: colors.primaryDark,
+        titleFont: { size: 14, family: "'Poppins', sans-serif" },
+        bodyFont: { size: 12, family: "'Poppins', sans-serif" },
       },
     },
     maintainAspectRatio: false,
@@ -439,11 +553,13 @@ const Statistics = () => {
     labels: ['Apprenants', 'Instructeurs', 'Experts'],
     datasets: [
       {
-        label: 'Nombre d’utilisateurs par rôle',
+        label: 'Number of Users by Role',
         data: [userStats.apprenants, userStats.instructeurs, userStats.experts],
-        backgroundColor: ['#1890ff', '#cf1322', '#faad14'],
-        borderColor: ['#096dd9', '#a8071a', '#d46b08'],
+        backgroundColor: [colors.primaryLight, colors.primary, colors.primaryDark],
+        borderColor: [colors.primaryLight, colors.primary, colors.primaryDark],
         borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 40
       },
     ],
   };
@@ -452,49 +568,37 @@ const Statistics = () => {
     scales: {
       y: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Nombre d’utilisateurs',
-          font: { size: 14 },
-          color: '#374151',
-        },
-        ticks: { color: '#374151' },
+        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+        ticks: { color: colors.text.secondary }
       },
       x: {
-        title: {
-          display: true,
-          text: 'Rôles',
-          font: { size: 14 },
-          color: '#374151',
-        },
-        ticks: { color: '#374151' },
-      },
+        grid: { display: false },
+        ticks: { color: colors.text.secondary }
+      }
     },
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 },
+        backgroundColor: colors.primaryDark,
+        titleFont: { size: 14, family: "'Poppins', sans-serif" },
+        bodyFont: { size: 12, family: "'Poppins', sans-serif" },
       },
     },
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000,
-      easing: 'easeOutQuart',
-    },
+    animation: { duration: 1000, easing: 'easeOutQuart' },
   };
 
   const paymentDoughnutData = {
-    labels: Object.keys(paymentStats.statusDistribution),
+    labels: Object.keys(paymentStats.statusDistribution).map(key => 
+      key.charAt(0).toUpperCase() + key.slice(1)
+    ),
     datasets: [
       {
         data: Object.values(paymentStats.statusDistribution),
-        backgroundColor: ['#2f9e44', '#e03131'],
-        hoverBackgroundColor: ['#37b24d', '#f03e3e'],
-        borderWidth: 1,
+        backgroundColor: [colors.success, colors.warning],
+        hoverBackgroundColor: ['#4fd1c5', '#f6ad55'],
+        borderWidth: 2,
+        borderColor: '#ffffff',
       },
     ],
   };
@@ -520,16 +624,18 @@ const Statistics = () => {
     }),
     datasets: [
       {
-        label: 'Montant des paiements',
+        label: 'Payment Amount',
         data: monthlyAmounts,
         fill: true,
-        backgroundColor: 'rgba(34, 197, 94, 0.2)',
-        borderColor: '#2f9e44',
+        backgroundColor: 'rgba(106, 17, 203, 0.1)',
+        borderColor: colors.primary,
         tension: 0.4,
-        pointBackgroundColor: '#2f9e44',
+        pointBackgroundColor: colors.primary,
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: '#2f9e44',
+        pointHoverBorderColor: colors.primary,
+        pointRadius: 4,
+        pointHoverRadius: 6
       },
     ],
   };
@@ -538,121 +644,144 @@ const Statistics = () => {
     scales: {
       y: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Montant (USD)',
-          font: { size: 14 },
-          color: '#374151',
-        },
-        ticks: { color: '#374151' },
+        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+        ticks: { 
+          color: colors.text.secondary,
+          callback: function(value) {
+            return value + ' €';
+          }
+        }
       },
       x: {
-        title: {
-          display: true,
-          text: 'Mois',
-          font: { size: 14 },
-          color: '#374151',
-        },
-        ticks: { color: '#374151' },
-      },
+        grid: { display: false },
+        ticks: { color: colors.text.secondary }
+      }
     },
     plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          font: { size: 14 },
-          color: '#374151',
-        },
-      },
+      legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 },
+        backgroundColor: colors.primaryDark,
+        titleFont: { size: 14, family: "'Poppins', sans-serif" },
+        bodyFont: { size: 12, family: "'Poppins', sans-serif" },
+        callbacks: {
+          label: function(context) {
+            return `${context.formattedValue} €`;
+          }
+        }
       },
     },
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000,
-      easing: 'easeOutQuart',
-    },
+    animation: { duration: 1000, easing: 'easeOutQuart' },
   };
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Statistiques</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Overview</h2>
       <Row gutter={[16, 16]}>
-        <Col span={12}>
+        <Col span={6}>
           <Card
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px', textAlign: 'center' }}
+            className="bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            style={{ border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <Statistic
-              title="Total Utilisateurs"
-              value={userStats.totalUsers}
-              valueStyle={{ color: '#3f8600', fontSize: '2rem', fontWeight: 'bold' }}
-              className="py-4"
-            />
+            <div className="flex items-center mb-2">
+              <FaUsers className="text-2xl mr-2 text-purple-200" />
+              <h3 className="text-lg font-medium">Users</h3>
+            </div>
+            <div className="text-3xl font-bold mb-1">{userStats.totalUsers}</div>
+            <div className="text-sm text-purple-200">Total registered users</div>
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card
+            className="bg-gradient-to-br from-violet-600 to-violet-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            style={{ border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div className="flex items-center mb-2">
+              <FaMoneyBillWave className="text-2xl mr-2 text-violet-200" />
+              <h3 className="text-lg font-medium">Payments</h3>
+            </div>
+            <div className="text-3xl font-bold mb-1">{paymentStats.totalCount}</div>
+            <div className="text-sm text-violet-200">Total transactions</div>
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card
+            className="bg-gradient-to-br from-teal-600 to-teal-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            style={{ border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div className="flex items-center mb-2">
+              <FaChartBar className="text-2xl mr-2 text-teal-200" />
+              <h3 className="text-lg font-medium">Revenue</h3>
+            </div>
+            <div className="text-3xl font-bold mb-1">{paymentStats.totalAmount.toFixed(2)} €</div>
+            <div className="text-sm text-teal-200">Total revenue</div>
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card
+            className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            style={{ border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div className="flex items-center mb-2">
+              <FaUserShield className="text-2xl mr-2 text-indigo-200" />
+              <h3 className="text-lg font-medium">Average Payment</h3>
+            </div>
+            <div className="text-3xl font-bold mb-1">{paymentStats.averageAmount.toFixed(2)} €</div>
+            <div className="text-sm text-indigo-200">Average transaction value</div>
           </Card>
         </Col>
         <Col span={12}>
           <Card
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px', textAlign: 'center' }}
+            title={<span className="text-gray-700 font-medium">User Role Distribution</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <Statistic
-              title="Montant Total des Paiements (USD)"
-              value={paymentStats.totalAmount.toFixed(2)}
-              valueStyle={{ color: '#2f9e44', fontSize: '2rem', fontWeight: 'bold' }}
-              className="py-2"
-            />
-            <Statistic
-              title="Nombre de Paiements"
-              value={paymentStats.totalCount}
-              valueStyle={{ color: '#2f9e44', fontSize: '1.5rem' }}
-              className="py-2"
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card
-            title="Répartition des Rôles"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
-          >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Doughnut data={userDoughnutData} options={doughnutOptions} />
             </div>
           </Card>
         </Col>
         <Col span={12}>
           <Card
-            title="Nombre par Rôle"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
+            title={<span className="text-gray-700 font-medium">Users by Role</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Bar data={userBarData} options={barOptions} />
             </div>
           </Card>
         </Col>
         <Col span={12}>
           <Card
-            title="Répartition des Statuts de Paiement"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
+            title={<span className="text-gray-700 font-medium">Payment Status Distribution</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Doughnut data={paymentDoughnutData} options={doughnutOptions} />
             </div>
           </Card>
         </Col>
         <Col span={12}>
           <Card
-            title="Évolution des Paiements"
-            className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-            style={{ borderRadius: '12px' }}
+            title={<span className="text-gray-700 font-medium">Payment Trends</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
           >
-            <div style={{ height: '300px', padding: '20px' }}>
+            <div style={{ height: '300px', padding: '10px' }}>
               <Line data={lineData} options={lineOptions} />
             </div>
           </Card>
@@ -662,28 +791,27 @@ const Statistics = () => {
   );
 };
 
-// Composant AdminModal
+// AdminModal Component
 const AdminModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     FullName: '',
     email: '',
     password: '',
-    profileImage: null,
   });
   const [formError, setFormError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.email.includes('@')) {
-      setFormError('Veuillez entrer un email valide.');
+      setFormError('Please enter a valid email.');
       return;
     }
     if (!formData.password) {
-      setFormError('Le mot de passe est requis.');
+      setFormError('Password is required.');
       return;
     }
     if (formData.password.length < 6) {
-      setFormError('Le mot de passe doit contenir au moins 6 caractères.');
+      setFormError('Password must be at least 6 characters.');
       return;
     }
     setFormError('');
@@ -692,7 +820,6 @@ const AdminModal = ({ isOpen, onClose, onSubmit }) => {
       FullName: '',
       email: '',
       password: '',
-      profileImage: null,
     });
     onClose();
   };
@@ -700,72 +827,111 @@ const AdminModal = ({ isOpen, onClose, onSubmit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">Ajouter un Admin</h2>
-        {formError && <p className="text-red-600 mb-4">{formError}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700">Nom complet</label>
-            <input
-              type="text"
-              value={formData.FullName}
-              onChange={(e) => setFormData({ ...formData, FullName: e.target.value })}
-              className="w-full p-2 border rounded"
-            />
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 animate-fade-in">
+        <div className="relative p-6">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-t-2xl p-4 -m-6 mb-4">
+            <h2 className="text-xl font-bold text-white">Add Admin</h2>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Mot de passe</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              placeholder="Au moins 6 caractères"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Image de profil</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFormData({ ...formData, profileImage: e.target.files[0] })}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Enregistrer
-            </button>
-          </div>
-        </form>
+          <button
+            onClick={onClose}
+            className="absolute top-2 right-2 text-white hover:text-gray-200 transition-colors"
+            title="Close"
+            aria-label="Close modal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          {formError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {formError}
+            </div>
+          )}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <input
+                  id="fullName"
+                  type="text"
+                  value={formData.FullName}
+                  onChange={(e) => setFormData({ ...formData, FullName: e.target.value })}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  placeholder="Enter full name"
+                />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  placeholder="Enter email"
+                  required
+                />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  placeholder="At least 6 characters"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all font-medium"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-// Composant DataTable
+// DataTable Component
 const DataTable = ({ role, title }) => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
@@ -779,19 +945,17 @@ const DataTable = ({ role, title }) => {
         setError(null);
       })
       .catch((error) => {
-        console.error(`Erreur lors du chargement des ${title} :`, error);
+        console.error(`Error loading ${title}:`, error);
         setError(
           error.response
-            ? `Erreur serveur : ${error.response.status} - ${
-                error.response.data.error || 'Inconnu'
-              }`
-            : 'Impossible de se connecter au serveur.'
+            ? `Server error: ${error.response.status} - ${error.response.data.error || 'Unknown'}`
+            : 'Unable to connect to the server.'
         );
       });
   }, [role, title]);
 
   const handleDelete = (id) => {
-    if (window.confirm('Voulez-vous vraiment supprimer cet utilisateur ?')) {
+    if (window.confirm('Are you sure you want to delete this user?')) {
       axios
         .delete(`${API_BASE_URL}/users/${id}`)
         .then(() => {
@@ -799,11 +963,11 @@ const DataTable = ({ role, title }) => {
           setError(null);
         })
         .catch((error) => {
-          console.error(`Erreur lors de la suppression d'un ${title} :`, error);
+          console.error(`Error deleting ${title}:`, error);
           setError(
             error.response
-              ? `Erreur : ${error.response.data.error || 'Suppression échouée'}`
-              : 'Erreur réseau lors de la suppression.'
+              ? `Error: ${error.response.data.error || 'Deletion failed'}`
+              : 'Network error during deletion.'
           );
         });
     }
@@ -811,64 +975,72 @@ const DataTable = ({ role, title }) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">{title}</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg shadow">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-3 text-left text-gray-600 font-semibold">Image</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Nom complet</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Email</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Rôle</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data.map((item) => (
-                <tr key={item._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">
-                    {item.profileImage ? (
-                      <img
-                        src={`${API_BASE_URL}${item.profileImage}`}
-                        alt="Profil"
-                        className="w-10 h-10 rounded-full object-cover"
-                        onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
-                      />
-                    ) : (
-                      'Aucune'
-                    )}
-                  </td>
-                  <td className="p-3">{item.FullName || 'Non défini'}</td>
-                  <td className="p-3">{item.email}</td>
-                  <td className="p-3">{item.role.charAt(0).toUpperCase() + item.role.slice(1)}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Supprimer"
-                    >
-                      <FaTrash />
-                    </button>
+      <div className="overflow-hidden bg-white rounded-xl shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.length > 0 ? (
+                data.map((item) => (
+                  <tr key={item._id} className="hover:bg-purple-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.profileImage ? (
+                        <img
+                          src={`${API_BASE_URL}${item.profileImage}`}
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover"
+                          onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                        />
+                      ) : (
+                        'None'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{item.FullName || 'Not defined'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{item.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{item.role.charAt(0).toUpperCase() + item.role.slice(1)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                    No data available
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-3 text-center text-gray-500">
-                  Aucune donnée disponible
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 };
 
-// Composant AdminTable
+// AdminTable Component
 const AdminTable = () => {
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -883,13 +1055,11 @@ const AdminTable = () => {
         setError(null);
       })
       .catch((error) => {
-        console.error('Erreur lors du chargement des Admins :', error);
+        console.error('Error loading Admins:', error);
         setError(
           error.response
-            ? `Erreur serveur : ${error.response.status} - ${
-                error.response.data.error || 'Inconnu'
-              }`
-            : 'Impossible de se connecter au serveur.'
+            ? `Server error: ${error.response.status} - ${error.response.data.error || 'Unknown'}`
+            : 'Unable to connect to the server.'
         );
       });
   }, []);
@@ -911,17 +1081,17 @@ const AdminTable = () => {
         setError(null);
       })
       .catch((error) => {
-        console.error("Erreur lors de l'ajout d'un Admin :", error);
+        console.error("Error adding Admin:", error);
         setError(
           error.response
-            ? `Erreur : ${error.response.data.error || 'Ajout échoué'} (Statut ${error.response.status})`
-            : 'Erreur réseau lors de l’ajout.'
+            ? `Error: ${error.response.data.error || 'Addition failed'} (Status ${error.response.status})`
+            : 'Network error during addition.'
         );
       });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Voulez-vous vraiment supprimer cet administrateur ?')) {
+    if (window.confirm('Are you sure you want to delete this administrator?')) {
       axios
         .delete(`${API_BASE_URL}/users/${id}`)
         .then(() => {
@@ -929,11 +1099,11 @@ const AdminTable = () => {
           setError(null);
         })
         .catch((error) => {
-          console.error("Erreur lors de la suppression d'un Admin :", error);
+          console.error("Error deleting Admin:", error);
           setError(
             error.response
-              ? `Erreur : ${error.response.data.error || 'Suppression échouée'}`
-              : 'Erreur réseau lors de la suppression.'
+              ? `Error: ${error.response.data.error || 'Deletion failed'}`
+              : 'Network error during deletion.'
           );
         });
     }
@@ -941,66 +1111,74 @@ const AdminTable = () => {
 
   return (
     <div className="mb-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Admins</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-800">Admins</h2>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md"
         >
-          <FaPlus className="mr-2" /> Ajouter
+          <FaPlus className="mr-2" /> Add
         </button>
       </div>
       {error && <p className="text-red-600 mb-4">{error}</p>}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg shadow">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-3 text-left text-gray-600 font-semibold">Image</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Nom complet</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Email</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Rôle</th>
-              <th className="p-3 text-left text-gray-600 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data.map((item) => (
-                <tr key={item._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">
-                    {item.profileImage ? (
-                      <img
-                        src={`${API_BASE_URL}${item.profileImage}`}
-                        alt="Profil"
-                        className="w-10 h-10 rounded-full object-cover"
-                        onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
-                      />
-                    ) : (
-                      'Aucune'
-                    )}
-                  </td>
-                  <td className="p-3">{item.FullName || 'Non défini'}</td>
-                  <td className="p-3">{item.email}</td>
-                  <td className="p-3">{item.role.charAt(0).toUpperCase() + item.role.slice(1)}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Supprimer"
-                    >
-                      <FaTrash />
-                    </button>
+      <div className="overflow-hidden bg-white rounded-xl shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.length > 0 ? (
+                data.map((item) => (
+                  <tr key={item._id} className="hover:bg-purple-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {item.profileImage ? (
+                        <img
+                          src={`${API_BASE_URL}${item.profileImage}`}
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover"
+                          onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                        />
+                      ) : (
+                        'None'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{item.FullName || 'Not defined'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{item.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{item.role.charAt(0).toUpperCase() + item.role.slice(1)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                    No data available
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="p-3 text-center text-gray-500">
-                  Aucune donnée disponible
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       <AdminModal
         isOpen={modalOpen}
@@ -1014,69 +1192,98 @@ const AdminTable = () => {
   );
 };
 
-// Composant principal Dashboard
+// Dashboard Component
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleProfile = () => {
+    setIsSidebarOpen(false);
+    navigate('/profile');
+  };
+
+  const handleLogout = () => {
+    // Clear authentication token (adjust key based on your setup)
+    localStorage.removeItem('authToken');
+    setIsSidebarOpen(false);
+    navigate('/login');
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-blue-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out z-50
+        className={`fixed inset-y-0 left-0 w-64 bg-purple-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out z-50
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           md:static md:translate-x-0 md:w-64`}
       >
-        <div className="p-4 text-2xl font-bold">E-Learning Admin</div>
+        <div className="p-4 text-2xl font-bold">Eduki</div>
         <nav className="flex-1 p-2">
           <div
             onClick={() => {
               setActiveTab('dashboard');
               setIsSidebarOpen(false);
             }}
-            className={`p-3 rounded-lg cursor-pointer ${
-              activeTab === 'dashboard' ? 'bg-blue-600' : 'hover:bg-blue-700'
+            className={`p-3 rounded-lg cursor-pointer flex items-center ${
+              activeTab === 'dashboard' ? 'bg-purple-600' : 'hover:bg-purple-700'
             }`}
           >
-            Les utilisateurs
+            <FaUsers className="mr-2" /> Users
           </div>
           <div
             onClick={() => {
               setActiveTab('statistics');
               setIsSidebarOpen(false);
             }}
-            className={`p-3 rounded-lg cursor-pointer ${
-              activeTab === 'statistics' ? 'bg-blue-600' : 'hover:bg-blue-700'
+            className={`p-3 rounded-lg cursor-pointer flex items-center ${
+              activeTab === 'statistics' ? 'bg-purple-600' : 'hover:bg-purple-700'
             }`}
           >
-            Statistiques
+            <FaChartBar className="mr-2" /> Statistics
           </div>
           <div
             onClick={() => {
               setActiveTab('transactions');
               setIsSidebarOpen(false);
             }}
-            className={`p-3 rounded-lg cursor-pointer ${
-              activeTab === 'transactions' ? 'bg-blue-600' : 'hover:bg-blue-700'
+            className={`p-3 rounded-lg cursor-pointer flex items-center ${
+              activeTab === 'transactions' ? 'bg-purple-600' : 'hover:bg-purple-700'
             }`}
           >
-            Transactions
+            <FaMoneyBillWave className="mr-2" /> Transactions
           </div>
           <div
             onClick={() => {
               setActiveTab('courses');
               setIsSidebarOpen(false);
             }}
-            className={`p-3 rounded-lg cursor-pointer ${
-              activeTab === 'courses' ? 'bg-blue-600' : 'hover:bg-blue-700'
+            className={`p-3 rounded-lg cursor-pointer flex items-center ${
+              activeTab === 'courses' ? 'bg-purple-600' : 'hover:bg-purple-700'
             }`}
           >
-            Cours
+            <FaFileAlt className="mr-2" /> Courses
+          </div>
+          <div
+            onClick={handleProfile}
+            className={`p-3 rounded-lg cursor-pointer flex items-center ${
+              activeTab === 'profile' ? 'bg-purple-600' : 'hover:bg-purple-700'
+            }`}
+          >
+            <FaUser className="mr-2" /> Profile
           </div>
         </nav>
+        <div className="p-2">
+          <div
+            onClick={handleLogout}
+            className="p-3 rounded-lg cursor-pointer flex items-center bg-red-600 hover:bg-red-700"
+          >
+            <FaSignOutAlt className="mr-2" /> Logout
+          </div>
+        </div>
       </div>
 
       {isSidebarOpen && (
@@ -1097,7 +1304,7 @@ const Dashboard = () => {
         {activeTab === 'dashboard' ? (
           <>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">
-              Tableau de bord
+              Dashboard
             </h1>
             <AdminTable />
             <DataTable role="APPRENANT" title="Apprenants" />
@@ -1107,7 +1314,7 @@ const Dashboard = () => {
         ) : activeTab === 'statistics' ? (
           <>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">
-              Statistiques
+              Statistics
             </h1>
             <Statistics />
           </>
@@ -1121,13 +1328,13 @@ const Dashboard = () => {
         ) : activeTab === 'courses' ? (
           <>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">
-              Gestion des Cours
+              Course Management
             </h1>
             <CoursesTable />
             <CourseStatistics />
           </>
         ) : (
-          <p className="text-gray-600">Sélectionnez une option dans la sidebar.</p>
+          <p className="text-gray-600">Select an option from the sidebar.</p>
         )}
       </div>
     </div>

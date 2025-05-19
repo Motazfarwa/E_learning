@@ -16,7 +16,6 @@ const MEETINGS_API = "http://localhost:4000/api/meetings";
 
 const CalendarComponent = () => {
   const [events, setEvents] = useState([]);
-  const [meetings, setMeetings] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
@@ -50,20 +49,19 @@ const CalendarComponent = () => {
       const [startTime, endTime] = values.timeRange;
       const meetingData = {
         expert: values.expert,
-        learner: values.learner,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         duration: values.duration || 30,
       };
   
       const response = await axios.post(MEETINGS_API, meetingData);
-      const { _id, learner, startTime: newStart, endTime: newEnd } = response.data;
+      const { _id,expert, startTime: newStart, endTime: newEnd } = response.data;
 
       setEvents(prev => [
         ...prev,
         {
           id: _id,
-          title: `Meeting with ${learner}`,
+          title: `Meeting with ${expert}`,
           start: newStart,
           end: newEnd,
           color: '#36D399',
@@ -125,12 +123,7 @@ const CalendarComponent = () => {
                   <Input placeholder="Enter expert's email" type="email" />
                 </Form.Item>
 
-                <Form.Item 
-                  label="Learner Email" 
-                  name="learner"
-                  rules={[{ required: true, message: "Please enter learner's email" }]}>
-                  <Input placeholder="Enter learner's email" type="email" />
-                </Form.Item>
+             
 
                 <Form.Item label="Meeting Time" name="timeRange" rules={[{ required: true }]}>
                   <RangePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: '100%' }} />

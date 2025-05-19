@@ -23,6 +23,8 @@ import ProfilePage from './pages/ProfilePage';
 import Apprenantcalendar from './pages/Apprenantcalendar';
 import HomePage from './pages/HomePage';
 import CoursesAndExpertsPage from './pages/CoursesAndExpertsPage';
+import ChatApp from './pages/chatboat';
+import CourseRoom from './pages/CourseRoom';
 
 
 
@@ -45,6 +47,7 @@ function App() {
           <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT' , 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
           <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
           <Route path="/learn" element={<CoursesAndExpertsPage />} />
+          <Route path="/course/:roomId" element={<CourseRoom />} />
           <Route
             path="/payment"
             element={
@@ -76,6 +79,7 @@ function App() {
   
   <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'EXPERT' , 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
   <Route path="/studentcalendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT']}><Apprenantcalendar /></ProtectedRoute>} />
+  <Route path="/chatboat" element={<ProtectedRoute allowedRoles={['ADMIN',  'INSTRUCTEUR']}><ChatApp /></ProtectedRoute>} />
   
  
         </Routes>

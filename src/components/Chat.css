@@ -1,0 +1,59 @@
+/* src/styles/Chat.css */
+.chat-container {
+  max-width: 600px;
+  margin: 20px auto;
+  border: 1px solid #ccc;
+  padding: 20px;
+}
+
+.messages {
+  height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.message {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.sent {
+  background-color: #007bff;
+  color: white;
+  margin-left: 20%;
+}
+
+.received {
+  background-color: #f1f0f0;
+  margin-right: 20%;
+}
+
+.instructor {
+  border-left: 4px solid #28a745;
+}
+
+.student {
+  border-left: 4px solid #ffc107;
+}
+
+form {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
