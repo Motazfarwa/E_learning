@@ -22,7 +22,8 @@ const Login = () => {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("email", response.data.email);
-        localStorage.setItem("FullName", response.data.user.FullName);
+        localStorage.setItem("sender", response.data.user.FullName);
+        localStorage.setItem("user_id", response.data.user.id);
         navigate("/home");
       }
       console.log('data',response.data);

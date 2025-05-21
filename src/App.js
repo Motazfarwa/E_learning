@@ -18,6 +18,8 @@ import Calendar from './pages/Maintenacecalendar';
 import Apprenantcalendar from './pages/Apprenantcalendar';
 import ChatApp from './pages/chatboat';
 import ChatComponent from './pages/ChatComponent';
+import ChatRoom from './pages/ChatRoom';
+import CreateRoom from './pages/RoomGenerator';
 
 
 // Your Stripe publishable key (replace with your own key)
@@ -58,7 +60,25 @@ function App() {
   <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
   <Route path="/studentcalendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT']}><Apprenantcalendar /></ProtectedRoute>} />
   <Route path="/chatboat" element={<ProtectedRoute allowedRoles={['ADMIN',  'INSTRUCTEUR']}><ChatApp /></ProtectedRoute>} />
-  <Route path="/chatroom" element={<ProtectedRoute allowedRoles={['ADMIN',  'INSTRUCTEUR']}><ChatComponent /></ProtectedRoute>} />
+  <Route 
+  path="/room" 
+  element={
+    <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+      <CreateRoom />
+    </ProtectedRoute>
+  } 
+/>
+
+
+{/*chatroom*/}
+<Route 
+  path="/chat" 
+  element={
+    <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+      <ChatRoom />
+    </ProtectedRoute>
+  } 
+/>
   <Route
   path="/payment"
   element={
