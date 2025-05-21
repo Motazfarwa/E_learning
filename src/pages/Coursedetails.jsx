@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Layout, Menu, Card, Input, Button, List } from 'antd';
-import {
-  HomeOutlined,
-  BookOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Avatar } from "antd";
+import { Layout, Menu, Card, Input, Button, List, Avatar } from 'antd';
+import { HomeOutlined, BookOutlined, UserOutlined } from '@ant-design/icons';
+import { FiMenu, FiX, FiArrowLeft } from 'react-icons/fi';
+import logo from "../assets/51031-removebg-preview.png";
 
-
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 const { TextArea } = Input;
+
+const backgroundImages = [
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1446329813274-7c9036bd9a1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1472214103451-9374bd1c7983?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1501854140801-50d01608902b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+];
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -21,205 +25,225 @@ const CourseDetails = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [collapsed, setCollapsed] = useState(false);
+  const [backgroundImg, setBackgroundImg] = useState(null);
+  const fullname = localStorage.getItem('FullName');
 
   useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+    setBackgroundImg(backgroundImages[randomIndex]);
+
     axios.get(`http://localhost:4000/api/courses/${id}`)
       .then((response) => {
         setCourse(response.data);
         setLoading(false);
       })
       .catch(() => {
-        setError('Error fetching course details');
+        setError('Erreur lors du chargement des détails du cours');
         setLoading(false);
       });
 
     axios.get(`http://localhost:4000/api/courses/${id}/comments`)
       .then((response) => setComments(response.data))
-      .catch(() => console.error("Error fetching comments"));
+      .catch(() => console.error("Erreur lors du chargement des commentaires"));
   }, [id]);
-  const fullname = localStorage.getItem('FullName')
 
-const handleCommentSubmit = (type) => {
-  if (!newComment.trim()) return;
+  const handleCommentSubmit = (type) => {
+    if (!newComment.trim()) return;
 
-  const newCommentData = { text: newComment, type, userId: fullname };
+    const newCommentData = { text: newComment, type, userId: fullname };
 
-  axios.post(`http://localhost:4000/api/courses/${id}/comments`, newCommentData, { withCredentials: true })
-    .then(() => {
-      setNewComment("");
+    axios.post(`http://localhost:4000/api/courses/${id}/comments`, newCommentData, { withCredentials: true })
+      .then(() => {
+        setNewComment("");
+        axios.get(`http://localhost:4000/api/courses/${id}/comments`)
+          .then((response) => setComments(response.data))
+          .catch(() => console.error("Erreur lors du chargement des commentaires mis à jour"));
+      })
+      .catch((error) => {
+        if (error.response && error.response.data.message) {
+          alert(error.response.data.message);
+        } else {
+          console.error("Erreur lors de l'envoi du commentaire");
+        }
+      });
+  };
 
-      axios.get(`http://localhost:4000/api/courses/${id}/comments`)
-        .then((response) => setComments(response.data))
-        .catch(() => console.error("Error fetching updated comments"));
-    })
-    .catch((error) => {
-      if (error.response && error.response.data.message) {
-        alert(error.response.data.message); // Show message from backend
-      } else {
-        console.error("Error posting comment");
-      }
-    });
-};
-
-  
-  if (loading) return <p style={{ textAlign: "center", fontSize: "18px", fontWeight: "bold" }}>Loading course details...</p>;
-  if (error) return <p style={{ textAlign: "center", color: "red", fontSize: "18px" }}>{error}</p>;
+  if (loading) return <p className="text-center text-2xl font-bold">Chargement...</p>;
+  if (error) return <p className="text-center text-xl text-red-600">{error}</p>;
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} style={styles.sider}>
-        <div style={styles.logo}>My Courses</div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+    <div className="min-h-screen relative">
+      {/* Background Image with Overlay */}
+      <div className="w-full h-[400px] md:h-[600px] absolute top-0 left-0 opacity-20 overflow-hidden">
+        {backgroundImg && (
+          <img src={backgroundImg} alt="Background" className="w-full h-full object-cover" />
+        )}
+        <div className="absolute left-0 bottom-0 w-full h-[200px] bg-gradient-to-t from-purple-900 to-transparent opacity-80"></div>
+      </div>
+
+      {/* Header */}
+      <Header className="relative z-20 bg-white/90 backdrop-blur-sm shadow-md p-3 flex justify-between items-center fixed w-full top-0">
+        <img className="w-12 h-8" src={logo} alt="Logo" />
+        <button className="md:hidden text-gray-800 text-xl" onClick={() => setCollapsed(!collapsed)}>
+          {collapsed ? <FiMenu /> : <FiX />}
+        </button>
+        <nav className="hidden md:flex space-x-4">
+          <Link to="/" className="text-gray-800 font-medium hover:text-purple-600">Accueil</Link>
+          <Link to="/courses" className="text-gray-800 font-medium hover:text-purple-600">Cours</Link>
+          <Link to="/profile" className="text-gray-800 font-medium hover:text-purple-600">Profil</Link>
+        </nav>
+      </Header>
+
+      {/* Sidebar */}
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        className="fixed top-12 left-0 h-[calc(100vh-48px)] bg-white shadow-md z-30 md:static md:w-48 md:h-full"
+      >
+        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']}>
           <Menu.Item key="1" icon={<HomeOutlined />}>
-            <Link to="/">Home</Link>
+            <Link to="/">Accueil</Link>
           </Menu.Item>
           <Menu.Item key="2" icon={<BookOutlined />}>
-            <Link to="/courses">Courses</Link>
+            <Link to="/courses">Cours</Link>
           </Menu.Item>
           <Menu.Item key="3" icon={<UserOutlined />}>
-            <Link to="/profile">Profile</Link>
+            <Link to="/profile">Profil</Link>
           </Menu.Item>
         </Menu>
       </Sider>
 
-      <Layout>
-        <Header style={styles.header}>Course Details</Header>
-        <Content style={styles.content}>
-          <Card
-            title={course.nom}
-            bordered={false}
-            style={styles.card}
-          >
-            {/* Centered Course Image */}
-            {course.courseimagefile && (
-              <div style={styles.imageContainer}>
-                <img 
-                  src={`http://localhost:4000/uploads/${course.courseimagefile}`} 
-                  alt={course.nom} 
-                  style={styles.image} 
-                />
-              </div>
-            )}
-
-            {/* Course Description */}
-            <p style={styles.description}>{course.description}</p>
-
-            {/* Files: Video and PDF */}
-            {course.file && Array.isArray(course.file) && course.file.length > 0 && (
-              <div style={styles.fileContainer}>
-                {course.file.map((file, index) => {
-                  // Video handling
-                  if (file.endsWith('.mp4')) {
-                    return (
-                      <div key={index} style={styles.fileItem}>
-                        <h4 style={styles.fileTitle}>Lecture Video</h4>
-                        <div style={styles.videoContainer}>
-                          <video controls style={styles.video}>
-                            <source src={`http://localhost:4000/uploads/${file}`} type="video/mp4" />
-                          </video>
-                        </div>
-                        {/* Video Comment Section */}
-                        <div style={styles.commentSection}>
-                          <h4>Video Comments</h4>
-                          <List dataSource={comments.filter(c => c.type === 'video')} renderItem={(comment) => (
-                            <List.Item>{comment.text}</List.Item>
-                          )} />
-                          <TextArea
-                            rows={3}
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Add a comment for the video..."
-                            style={styles.textArea}
-                          />
-                          <Button 
-                            type="primary" 
-                            onClick={() => handleCommentSubmit('video')} 
-                            style={styles.submitButton}
-                          >
-                            Post Video Comment
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  }
-                  // PDF handling
-                  if (file.endsWith('.pdf')) {
-                    return (
-                      <div key={index} style={styles.fileItem}>
-                        <h4 style={styles.fileTitle}>Course Document</h4>
-                        <a 
-                          href={`http://localhost:4000/uploads/${file}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          style={styles.downloadLink}
-                        >
-                          📂 Download PDF
-                        </a>
-                        {/* PDF Comment Section */}
-                        <div style={styles.commentSection}>
-                          <h4>PDF Comments</h4>
-                          <List
-  dataSource={comments.filter(c => c.type === 'pdf')}
-  renderItem={(comment) => (
-    <List.Item className="comment-item">
-      <div className="comment-content">
-        <div className="comment-header">
-          <Avatar size={16} icon={<UserOutlined />} className="comment-icon" />
-          <span className="comment-username">{comment.userId}</span>
+      {/* Main Content */}
+      <Content className="relative z-10 pt-14 pb-8 pl-0 md:pl-48 max-w-3xl mx-auto px-4">
+        {/* Course Header */}
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <h1 className="text-3xl font-semibold text-gray-900">{course.nom}</h1>
+          {course.courseimagefile && (
+            <img
+              src={`http://localhost:4000/uploads/${course.courseimagefile}`}
+              alt={course.nom}
+              className="w-full h-56 object-cover rounded-md mt-3"
+            />
+          )}
         </div>
-        <p className="comment-text">{comment.text}</p>
-      </div>
-    </List.Item>
-  )}
-/>
-                  <TextArea
-                            rows={3}
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Add a comment for the PDF..."
-                            style={styles.textArea}
-                          />
-                          <Button 
-                            type="primary" 
-                            onClick={() => handleCommentSubmit('pdf')} 
-                            style={styles.submitButton}
-                          >
-                            Post PDF Comment
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return <p key={index} style={styles.noFileText}>File format not supported.</p>;
-                })}
-              </div>
-            )}
-          </Card>
-        </Content>
-      </Layout>
-    </Layout>
-  );
-};
 
-const styles = {
-  sider: { background: '#001529', width: 240 },
-  logo: { color: '#fff', fontSize: '24px', fontWeight: 'bold', textAlign: 'center', padding: '20px' },
-  header: { background: '#1890ff', color: '#fff', fontSize: '24px', textAlign: 'center', padding: '15px' },
-  content: { margin: '20px', padding: '20px', background: '#fff', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' },
-  card: { textAlign: 'center', boxShadow: '0 6px 12px rgba(0,0,0,0.1)', borderRadius: '10px', padding: '20px' },
-  description: { fontSize: '18px', color: '#333', marginBottom: '15px' },
-  imageContainer: { marginBottom: '20px', display: 'flex', justifyContent: 'center' },
-  image: { width: '100%', maxWidth: '600px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' },
-  fileContainer: { marginTop: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '10px' },
-  fileItem: { marginBottom: '15px', padding: '15px', background: '#fff', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' },
-  videoContainer: { display: 'flex', justifyContent: 'center' },
-  video: { width: '80%', maxWidth: '800px', borderRadius: '10px' },
-  downloadLink: { fontSize: '16px', color: '#1890ff', fontWeight: 'bold', display: 'inline-block', marginTop: '10px' },
-  noFileText: { fontSize: '16px', color: '#888' },
-  commentSection: { marginTop: '20px', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', background: '#f9f9f9' },
-  textArea: { marginTop: '10px', borderRadius: '5px', fontSize: '16px', padding: '10px', width: '100%' },
-  submitButton: { marginTop: '10px', width: '100%', backgroundColor: '#1890ff', borderColor: '#1890ff', fontSize: '16px', fontWeight: 'bold', borderRadius: '5px' },
-  fileTitle: { fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' },
+        {/* Details */}
+        <div className="space-y-6">
+          {/* Description */}
+          <Card className="bg-white rounded-lg shadow-sm p-4">
+            <h2 className="text-lg font-medium text-gray-900 mb-2">À propos</h2>
+            <p className="text-gray-700 text-base">{course.description}</p>
+          </Card>
+
+          {/* Files */}
+          {course.file && Array.isArray(course.file) && course.file.length > 0 && (
+            <div>
+              {course.file.map((file, index) => {
+                if (file.endsWith('.mp4')) {
+                  return (
+                    <Card key={index} className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                      <h2 className="text-lg font-medium text-gray-900 mb-2">Vidéo</h2>
+                      <div className="flex justify-center">
+                        <video controls className="w-full max-w-lg rounded-md">
+                          <source src={`http://localhost:4000/uploads/${file}`} type="video/mp4" />
+                        </video>
+                      </div>
+                      <div className="mt-4">
+                        <h3 className="text-base font-medium text-gray-900 mb-2">Commentaires</h3>
+                        <List
+                          dataSource={comments.filter(c => c.type === 'video')}
+                          renderItem={(comment) => (
+                            <List.Item className="py-2">
+                              <span className="text-gray-700">{comment.text}</span>
+                            </List.Item>
+                          )}
+                        />
+                        <TextArea
+                          rows={3}
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Ajouter un commentaire..."
+                          className="mt-2 rounded-md border-gray-300 focus:ring-2 focus:ring-purple-600 w-full"
+                        />
+                        <Button
+                          type="primary"
+                          onClick={() => handleCommentSubmit('video')}
+                          className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white rounded-md"
+                        >
+                          Envoyer
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                }
+                if (file.endsWith('.pdf')) {
+                  return (
+                    <Card key={index} className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                      <h2 className="text-lg font-medium text-gray-900 mb-2">Document</h2>
+                      <a
+                        href={`http://localhost:4000/uploads/${file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-purple-600 font-medium hover:underline block mb-2"
+                      >
+                        📄 Télécharger
+                      </a>
+                      <div className="mt-4">
+                        <h3 className="text-base font-medium text-gray-900 mb-2">Commentaires</h3>
+                        <List
+                          dataSource={comments.filter(c => c.type === 'pdf')}
+                          renderItem={(comment) => (
+                            <List.Item className="py-2">
+                              <div className="flex items-center gap-2">
+                                <Avatar size={16} icon={<UserOutlined />} className="text-gray-600" />
+                                <span className="text-gray-700">{comment.userId}: {comment.text}</span>
+                              </div>
+                            </List.Item>
+                          )}
+                        />
+                        <TextArea
+                          rows={3}
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Ajouter un commentaire..."
+                          className="mt-2 rounded-md border-gray-300 focus:ring-2 focus:ring-purple-600 w-full"
+                        />
+                        <Button
+                          type="primary"
+                          onClick={() => handleCommentSubmit('pdf')}
+                          className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white rounded-md"
+                        >
+                          Envoyer
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                }
+                return <p key={index} className="text-gray-500 text-base">Format non supporté</p>;
+              })}
+            </div>
+          )}
+
+          {/* Back Button */}
+          <div className="text-center mt-6">
+            <Link
+              to="/courses"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors duration-200 font-medium"
+            >
+              <FiArrowLeft size={16} />
+              <span>Retour</span>
+            </Link>
+          </div>
+        </div>
+      </Content>
+
+      {/* Footer */}
+      <Footer className="bg-white shadow-sm text-center py-2 mt-6">
+        <p className="text-gray-600 text-sm">© 2025 My Courses</p>
+      </Footer>
+    </div>
+  );
 };
 
 export default CourseDetails;
