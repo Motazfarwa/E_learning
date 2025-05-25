@@ -1,9 +1,8 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button, Form, Input, Alert, Spin, Card } from 'antd';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/51031-removebg-preview.png';
 
 const API_BASE_URL = 'http://localhost:4000/api';
@@ -15,23 +14,52 @@ const PaymentForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [course, setCourse] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const [form] = Form.useForm();
 
-  const handleSubmit = async (values) => {
-    if (!stripe || !elements || loading) {
-      console.log('Submission blocked: Stripe not loaded or already loading');
+  // Get courseId from URL query
+  const queryParams = new URLSearchParams(location.search);
+  const courseId = queryParams.get('courseId');
+
+  // Fetch course details
+  useEffect(() => {
+    if (!courseId) {
+      setError('No course specified for payment');
       return;
     }
 
-    if (values.amount <= 0) {
-      setError('Amount must be greater than 0');
+    const fetchCourse = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_BASE_URL}/courses/${courseId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCourse(response.data);
+        form.setFieldsValue({ amount: response.data.price });
+      } catch (err) {
+        setError('Failed to load course details');
+        console.error('Error fetching course:', err);
+      }
+    };
+
+    fetchCourse();
+  }, [courseId, form]);
+
+  const handleSubmit = async (values) => {
+    if (!stripe || !elements || loading || !course) {
+      console.log('Submission blocked: Stripe not loaded, already loading, or no course');
+      return;
+    }
+
+    if (course.price <= 0) {
+      setError('Course is free or has an invalid price');
       return;
     }
 
     setLoading(true);
     setError('');
-
 
     try {
       const token = localStorage.getItem('token');
@@ -41,13 +69,14 @@ const PaymentForm = () => {
       }
 
       // 1. Create Payment Intent
-      console.log('Creating Payment Intent with values:', values);
+      console.log('Creating Payment Intent for course:', courseId);
       const response = await axios.post(
-        `${API_BASE_URL}/create-payment-intent`,
+        `${API_BASE_URL}/payments/create-payment-intent`,
         {
-          amount: values.amount * 100,
+          courseId,
+          amount: course.price * 100, // Convert to cents
           currency: 'usd',
-          description: values.description || '',
+          description: `Payment for course: ${course.nom}`,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -84,18 +113,23 @@ const PaymentForm = () => {
         // 3. Confirm payment
         console.log('Sending payment confirmation for paymentId:', paymentIntent.id);
         const confirmResponse = await axios.post(
-          `${API_BASE_URL}/confirm_payment`,
+          `${API_BASE_URL}/payments/confirm-payment`,
           {
             paymentId: paymentIntent.id,
+            courseId,
             amount: paymentIntent.amount,
-            metadata: values,
+            metadata: {
+              name: values.name,
+              email: values.email,
+              description: values.description,
+            },
           },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         console.log('Confirm Payment Response:', confirmResponse.data);
-        setTimeout(() => navigate('/profile'), 3000);
+        setTimeout(() => navigate(`/courses/${courseId}`), 3000);
       }
     } catch (err) {
       const errorMessage = err.message || 'Payment failed';
@@ -105,6 +139,10 @@ const PaymentForm = () => {
       setLoading(false);
     }
   };
+
+  if (!course && !error) {
+    return <Spin tip="Loading course details..." />;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -147,41 +185,40 @@ const PaymentForm = () => {
         </ul>
       </div>
       <Card className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-center mb-4">Secure Payment</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6">Paiement Sécurisé</h2>
         {success ? (
           <Alert
-            message="Payment Successful!"
-            description="Your transaction has been completed successfully."
+            message="Paiement Réussi !"
+            description={`Votre paiement pour "${course?.nom}" a été effectué avec succès. Redirection vers le cours...`}
             type="success"
             showIcon
           />
         ) : (
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Form form={form} layout="vertical" onFinish={handleSubmit} className="space-y-4">
             <Form.Item
-              label="Full Name"
+              label="Nom Complet"
               name="name"
-              rules={[{ required: true, message: 'Please enter your name' }]}
+              rules={[{ required: true, message: 'Veuillez entrer votre nom' }]}
             >
-              <Input placeholder="John Doe" />
+              <Input placeholder="John Doe" className="w-full" />
             </Form.Item>
             <Form.Item
               label="Email"
               name="email"
-              rules={[{ type: 'email', required: true, message: 'Please enter a valid email' }]}
+              rules={[{ type: 'email', required: true, message: 'Veuillez entrer un email valide' }]}
             >
-              <Input placeholder="john.doe@example.com" />
+              <Input placeholder="john.doe@example.com" className="w-full" />
             </Form.Item>
-            <Form.Item
-              label="Amount (USD)"
-              name="amount"
-              rules={[{ required: true, message: 'Please enter amount' }]}
-            >
-              <Input type="number" min="1" step="0.01" placeholder="Enter amount" />
+            <Form.Item label="Cours">
+              <Input value={course?.nom} disabled className="w-full" />
             </Form.Item>
-            <Form.Item label="Payment Description" name="description">
-              <Input.TextArea placeholder="Enter payment details (optional)" />
+            <Form.Item label="Montant (USD)">
+              <Input value={course?.price?.toFixed(2)} disabled className="w-full" />
             </Form.Item>
-            <Form.Item label="Card Details" required>
+            <Form.Item label="Description du Paiement" name="description">
+              <Input.TextArea placeholder="Détails du paiement (facultatif)" className="w-full" />
+            </Form.Item>
+            <Form.Item label="Détails de la Carte" required>
               <div className="border border-gray-300 p-2 rounded">
                 <CardElement
                   options={{
@@ -197,16 +234,16 @@ const PaymentForm = () => {
                 />
               </div>
             </Form.Item>
-            {error && <Alert message={error} type="error" showIcon className="mb-3" />}
+            {error && <Alert message={error} type="error" showIcon className="mb-4" />}
             <Form.Item>
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={!stripe || loading}
+                disabled={!stripe || loading || !course}
                 block
                 className="text-lg font-medium"
               >
-                {loading ? <Spin /> : 'Pay Now'}
+                {loading ? <Spin /> : 'Payer Maintenant'}
               </Button>
             </Form.Item>
           </Form>

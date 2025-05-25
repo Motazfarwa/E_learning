@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiBook, FiEdit, FiStar, FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
+import { FiBook, FiEdit, FiStar, FiMenu, FiX, FiArrowRight, FiEye, FiCreditCard } from 'react-icons/fi';
+import axios from 'axios';
 
 // Fade in animation variants
 const fadeIn = (direction, delay) => {
@@ -37,6 +38,10 @@ const backgroundImages = [
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [backgroundImg, setBackgroundImg] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [imageError, setImageError] = useState(false);
+  const [paidCourses, setPaidCourses] = useState([]);
+  const navigate = useNavigate();
 
   // Set random background image on load
   useEffect(() => {
@@ -44,8 +49,42 @@ const HomePage = () => {
     setBackgroundImg(backgroundImages[randomIndex]);
   }, []);
 
+  // Fetch courses from the backend
+  useEffect(() => {  
+    axios.get('http://localhost:4000/api/courses')
+      .then((res) => {
+        setCourses(res.data);
+      })
+      .catch((error) => console.error('Error fetching courses:', error));
+  }, []);
+
+  // Fetch paid courses for the user
+  useEffect(() => {
+    const fetchPaidCourses = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/user/courses/paid', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        setPaidCourses(response.data.paidCourseIds || []);
+      } catch (error) {
+        console.error('Error fetching paid courses:', error);
+        setPaidCourses([]);
+      }
+    };
+
+    fetchPaidCourses();
+  }, []);
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handlePayment = (courseId) => {
+    navigate(`/payment?courseId=${courseId}`);
   };
 
   return (
@@ -67,13 +106,7 @@ const HomePage = () => {
       {/* Header */}
       <header className="relative z-10 bg-white/90 backdrop-blur-sm shadow-md p-4 flex justify-between items-center w-full">
         <div className="text-2xl font-bold text-purple-700">Eduki</div>
-        <nav className="hidden md:flex space-x-6">
-          <Link to="/" className="text-gray-700 hover:text-purple-700 transition-colors">Accueil</Link>
-          <Link to="/courses" className="text-gray-700 hover:text-purple-700 transition-colors">Cours</Link>
-          <Link to="/blog" className="text-gray-700 hover:text-purple-700 transition-colors">Blog</Link>
-          <Link to="/about" className="text-gray-700 hover:text-purple-700 transition-colors">À propos</Link>
-          <Link to="/contact" className="text-gray-700 hover:text-purple-700 transition-colors">Contact</Link>
-        </nav>
+        
         <div className="flex items-center gap-4">
           <Link to="/login" className="hidden md:inline-block px-4 py-2 text-purple-700 hover:text-purple-800 transition-colors">Connexion</Link>
           <Link to="/register" className="hidden md:inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">Inscription</Link>
@@ -232,69 +265,61 @@ const HomePage = () => {
             <p className="text-gray-600 max-w-2xl mx-auto">Découvrez nos cours les plus suivis et rejoignez des milliers d'apprenants qui transforment leur vie grâce à l'acquisition de nouvelles compétences.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { 
-                title: 'Développement Web',
-                desc: 'Apprenez à créer des sites web modernes avec HTML, CSS et JavaScript.',
-                image: 'https://via.placeholder.com/400x225?text=Web+Development',
-                level: 'Débutant',
-                rating: 4.9,
-                students: 1200
-              },
-              { 
-                title: 'Design UX/UI',
-                desc: 'Maîtrisez les principes de conception d\'interface utilisateur et d\'expérience.',
-                image: 'https://via.placeholder.com/400x225?text=UX/UI+Design',
-                level: 'Intermédiaire',
-                rating: 4.8,
-                students: 850
-              },
-              { 
-                title: 'Intelligence Artificielle',
-                desc: 'Découvrez les fondements de l\'IA et du machine learning.',
-                image: 'https://via.placeholder.com/400x225?text=AI+Course',
-                level: 'Avancé',
-                rating: 4.7,
-                students: 620
-              }
-            ].map((course, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn('up', 0.1 * index)}
-                initial='hidden'
-                whileInView='show'
-                viewport={{ once: false, amount: 0.1 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <img 
-                  src={course.image} 
-                  alt={course.title} 
-                  className="w-full h-48 object-cover" 
-                />
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">{course.level}</span>
-                    <div className="flex items-center">
-                      <FiStar className="text-yellow-500" />
-                      <span className="ml-1 text-sm text-gray-600">{course.rating}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.length > 0 ? (
+              courses.map((course, index) => (
+                <motion.div
+                  key={course._id}
+                  variants={fadeIn('up', 0.1 * index)}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: false, amount: 0.1 }}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300"
+                >
+                  {course.courseimagefile ? (
+                    <img
+                      src={`http://localhost:4000/uploads/${course.courseimagefile}`}
+                      alt={course.nom}
+                      className="w-full h-52 object-cover rounded-t-2xl"
+                      onError={handleImageError}
+                    />
+                  ) : imageError ? (
+                    <div className="w-full h-52 flex items-center justify-center bg-gray-100 text-red-500 font-medium">
+                      Image non disponible
+                    </div>
+                  ) : (
+                    <div className="w-full h-52 flex items-center justify-center bg-gray-100 text-gray-500 font-medium">
+                      Aucune image
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h4 className="text-xl font-semibold text-gray-900 mb-2">{course.nom}</h4>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">{course.description}</p>
+                    <div className="flex justify-end">
+                      {paidCourses.includes(course._id) ? (
+                        <button
+                          onClick={() => navigate(`/courses/${course._id}`)}
+                          className="inline-flex items-center gap-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          <FiEye size={16} />
+                          Détails
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handlePayment(course._id)}
+                          className="inline-flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          <FiCreditCard size={16} />
+                          Payer
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <h4 className="text-xl font-semibold text-gray-800 mb-2">{course.title}</h4>
-                  <p className="text-gray-600 text-sm mb-4">{course.desc}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">{course.students} étudiants</span>
-                    <Link
-                      to={`/courses/${course.title.toLowerCase().replace(/\s/g, '-')}`}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
-                    >
-                      <span>Détails</span>
-                      <FiArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center col-span-full text-lg">Aucun cours disponible.</p>
+            )}
           </div>
           
           <div className="text-center mt-10">
@@ -506,7 +531,7 @@ const HomePage = () => {
           <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">Restez informé</h3>
           <p className="text-purple-100 mb-8">Inscrivez-vous à notre newsletter pour recevoir des conseils d'apprentissage, des offres spéciales et les dernières actualités.</p>
           
-          <form className="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
+          <div className="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
             <input 
               type="email" 
               placeholder="Votre adresse email" 
@@ -514,12 +539,11 @@ const HomePage = () => {
               required 
             />
             <button 
-              type="submit" 
               className="px-6 py-3 bg-purple-800 text-white rounded-md hover:bg-purple-900 transition-colors shadow-md"
             >
               S'inscrire
             </button>
-          </form>
+          </div>
         </div>
       </section>
 
@@ -549,27 +573,9 @@ const HomePage = () => {
               </div>
             </div>
             
-            <div>
-              <h5 className="font-bold text-white mb-4">Liens rapides</h5>
-              <ul className="space-y-2">
-                <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Accueil</Link></li>
-                <li><Link to="/courses" className="text-gray-400 hover:text-white transition-colors">Tous les cours</Link></li>
-                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">À propos</Link></li>
-                <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">Blog</Link></li>
-                <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
-              </ul>
-            </div>
             
-            <div>
-              <h5 className="font-bold text-white mb-4">Catégories</h5>
-              <ul className="space-y-2">
-                <li><Link to="/courses/development" className="text-gray-400 hover:text-white transition-colors">Développement Web</Link></li>
-                <li><Link to="/courses/design" className="text-gray-400 hover:text-white transition-colors">Design</Link></li>
-                <li><Link to="/courses/marketing" className="text-gray-400 hover:text-white transition-colors">Marketing Digital</Link></li>
-                <li><Link to="/courses/data-science" className="text-gray-400 hover:text-white transition-colors">Data Science</Link></li>
-                <li><Link to="/courses/business" className="text-gray-400 hover:text-white transition-colors">Business</Link></li>
-              </ul>
-            </div>
+            
+            
             
             <div>
               <h5 className="font-bold text-white mb-4">Contactez-nous</h5>
@@ -599,11 +605,7 @@ const HomePage = () => {
           
           <div className="mt-12 pt-8 border-t border-gray-800 text-center">
             <p className="text-gray-400">© 2025 Eduki. Tous droits réservés.</p>
-            <div className="flex justify-center space-x-6 mt-4">
-              <Link to="/terms" className="text-gray-500 hover:text-gray-300 text-sm">Conditions d'utilisation</Link>
-              <Link to="/privacy" className="text-gray-500 hover:text-gray-300 text-sm">Politique de confidentialité</Link>
-              <Link to="/cookies" className="text-gray-500 hover:text-gray-300 text-sm">Cookies</Link>
-            </div>
+            
           </div>
         </div>
       </footer>

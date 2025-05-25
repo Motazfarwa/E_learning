@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom'; // Added Link import
-import { FiUser, FiLogOut, FiMail, FiEdit, FiUpload, FiBook, FiBookOpen } from 'react-icons/fi'; // Added FiBook and FiBookOpen imports
-import logo from "../assets/51031-removebg-preview.png"; // Added logo import
+import { useNavigate, Link } from 'react-router-dom';
+import { FiUser, FiLogOut, FiMail, FiEdit, FiUpload, FiBook, FiBookOpen, FiCalendar } from 'react-icons/fi';
+import logo from "../assets/51031-removebg-preview.png";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('view'); // 'view' or 'edit'
   const [editForm, setEditForm] = useState({ fullName: '', bio: '', skills: '', profileImage: null });
-  const [error, setError] = useState(''); // Added for error handling
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const BACKEND_URL = 'http://localhost:4000';
 
@@ -179,6 +180,22 @@ const ProfilePage = () => {
           >
             <FiEdit className="w-5 h-5 mr-2" /> Modifier
           </button>
+          {user.role === 'APPRENANT' && (
+            <Link
+              to="/studentcalendar"
+              className="w-full flex items-center p-2 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              <FiCalendar className="w-5 h-5 mr-2" /> Calendrier Apprenant
+            </Link>
+          )}
+          {user.role === 'EXPERT' && (
+            <Link
+              to="/calendar"
+              className="w-full flex items-center p-2 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              <FiCalendar className="w-5 h-5 mr-2" /> Calendrier Expert
+            </Link>
+          )}
           <button
             onClick={() => {
               localStorage.clear();
@@ -277,7 +294,7 @@ const ProfilePage = () => {
                   <div className="text-center py-4">
                     <p className="text-gray-500 mb-2">Aucun cours suivi</p>
                     <button
-                      onClick={() => navigate('/getcours')}
+                      onClick={() => navigate('/cours')}
                       className="text-purple-600 font-medium hover:text-purple-800"
                     >
                       Parcourir les cours
@@ -295,7 +312,7 @@ const ProfilePage = () => {
                   <div className="text-center py-4">
                     <p className="text-gray-500 mb-2">Aucun cours créé</p>
                     <button
-                      onClick={() => navigate('/create-course')}
+                      onClick={() => navigate('/Ajoutercour')}
                       className="text-purple-600 font-medium hover:text-purple-800"
                     >
                       Créer un cours

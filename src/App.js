@@ -24,7 +24,14 @@ import Apprenantcalendar from './pages/Apprenantcalendar';
 import HomePage from './pages/HomePage';
 import CoursesAndExpertsPage from './pages/CoursesAndExpertsPage';
 import ChatApp from './pages/chatboat';
+
 import CourseRoom from './pages/CourseRoom';
+
+import ChatComponent from './pages/ChatComponent';
+import ChatRoom from './pages/ChatRoom';
+import CreateRoom from './pages/RoomGenerator';
+import Recommendations from './pages/Recommendations';
+import CourseDetailsList from './pages/CourseDetailsList';
 
 
 
@@ -47,11 +54,12 @@ function App() {
           <Route path="/getcours" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT' , 'INSTRUCTEUR']}><CourseList /></ProtectedRoute>} />
           <Route path="/cours/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}><Coursedetails /></ProtectedRoute>} />
           <Route path="/learn" element={<CoursesAndExpertsPage />} />
+          <Route path="/cours" element={<CourseDetailsList />} />
           <Route path="/course/:roomId" element={<CourseRoom />} />
           <Route
             path="/payment"
             element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+              <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR','APPRENANT']}>
                 <Elements stripe={stripePromise}>
                   <PaymentForm />
                 </Elements>
@@ -80,15 +88,40 @@ function App() {
   <Route path="/calendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'EXPERT' , 'INSTRUCTEUR']}><Calendar /></ProtectedRoute>} />
   <Route path="/studentcalendar" element={<ProtectedRoute allowedRoles={['ADMIN', 'APPRENANT']}><Apprenantcalendar /></ProtectedRoute>} />
   <Route path="/chatboat" element={<ProtectedRoute allowedRoles={['ADMIN',  'INSTRUCTEUR']}><ChatApp /></ProtectedRoute>} />
+
   
  
-        </Routes>
+   
+
+ 
+
+  <Route 
+  path="/room" 
+  element={
+    <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR']}>
+      <CreateRoom />
+    </ProtectedRoute>
+  } 
+/>
+
+
+{/*chatroom*/}
+<Route 
+  path="/chat" 
+  element={
+    <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR' , 'APPRENANT']}>
+      <ChatRoom />
+    </ProtectedRoute>
+  } 
+/>
+  <Route
+            path="/recommendations" element={Recommendations}
+            
+          />
+     </Routes>
       </div>
     </RoleProvider>
   );  
-
- 
-
 }
 
 export default App;

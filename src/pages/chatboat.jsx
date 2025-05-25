@@ -16,8 +16,12 @@ const handleSend = async () => {
   setIsLoading(true);
 
   try {
+
     const genAI = new GoogleGenerativeAI("AIzaSyDXK1d8R59ZnjAGh6IDJMufYgj9SsZSmZQ");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    
+
 
     const result = await model.generateContent(input);
     const response = await result.response;

@@ -1,19 +1,19 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Form, Input, Upload, Button, message } from 'antd';
+import { Form, Input, Upload, Button, message, Select, InputNumber } from 'antd';
 import { UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 import { RoleContext } from './RoleContext';
-import logo from "../assets/51031-removebg-preview.png";
+import logo from '../assets/51031-removebg-preview.png';
 
 // Background image array for a modern, beautiful landscape
 const backgroundImages = [
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80', // Beach sunset
-  'https://images.unsplash.com/photo-1446329813274-7c9036bd9a1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80', // Mountain landscape
-  'https://images.unsplash.com/photo-1472214103451-9374bd1c7983?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80', // Forest path
-  'https://images.unsplash.com/photo-1501854140801-50d01608902b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80', // Coastal cliffs
-  'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80', // Snowy mountains
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1446329813274-7c9036bd9a1f?ixlib=rb-4.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1472214103451-9374bd1c7983?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1501854140801-50d01608902b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
 ];
 
 // Fade in animation variants
@@ -50,37 +50,39 @@ const Addcourseform = () => {
   }, []);
 
   const onFinish = async (values) => {
-    const { machineImage, file, nom, description } = values;
-  
+    const { machineImage, file, description, nom, requiredSkills, price } = values;
+
     if (!machineImage || machineImage.length === 0) {
-      message.error('Veuillez uploader une image pour le cours');
+      message.error('Please upload an image for the course');
       return;
     }
-  
+
     if (!file || file.length === 0) {
-      message.error('Veuillez uploader un fichier');
+      message.error('Please upload a file');
       return;
     }
-  
+
     setLoading(true);
     const formData = new FormData();
     formData.append('nom', nom);
     formData.append('description', description);
     formData.append('courseimagefile', machineImage[0].originFileObj);
-  
+    formData.append('requiredSkills', JSON.stringify(requiredSkills || []));
+    formData.append('price', price || 0); // Default to 0 if not provided
+
     file.forEach((f) => {
       formData.append('file', f.originFileObj);
     });
-  
+
     try {
       await axios.post('http://localhost:4000/api/courses', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      message.success('Cours ajouté avec succès');
+      message.success('Course added successfully');
       form.resetFields();
     } catch (error) {
-      console.error('Erreur:', error);
-      message.error('Échec de l\'ajout du cours');
+      console.error('Error:', error.response?.data || error.message);
+      message.error('Failed to add course');
     } finally {
       setLoading(false);
     }
@@ -108,9 +110,9 @@ const Addcourseform = () => {
       <header className="relative z-20 bg-white/95 backdrop-blur-md shadow-lg p-4 flex justify-between items-center w-full">
         <img className="w-14 h-10" src={logo} alt="Logo" />
         <nav className="hidden md:flex space-x-8">
-          <a href="/Ajoutercour" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Ajouter des cours</a>
-          <a href="/cours/:id" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Détails de cours</a>
-          <a href="/getcours" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Liste des cours</a>
+          <a href="/Ajoutercour" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Add Courses</a>
+          <a href="/cours/:id" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Course Details</a>
+          <a href="/getcours" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Course List</a>
         </nav>
         <button className="md:hidden text-gray-800 text-2xl" onClick={toggleMenu}>
           {isOpen ? <FiX /> : <FiMenu />}
@@ -126,9 +128,9 @@ const Addcourseform = () => {
           className="fixed top-16 left-0 h-full w-64 bg-white shadow-2xl p-6 z-30 md:hidden"
         >
           <ul className="space-y-6 text-gray-800">
-            <li><a href="/Ajoutercour" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Ajouter des cours</a></li>
-            <li><a href="/cours/:id" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Détails de cours</a></li>
-            <li><a href="/getcours" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Liste des cours</a></li>
+            <li><a href="/Ajoutercour" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Add Courses</a></li>
+            <li><a href="/cours/:id" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Course Details</a></li>
+            <li><a href="/getcours" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Course List</a></li>
           </ul>
         </motion.div>
       )}
@@ -142,7 +144,7 @@ const Addcourseform = () => {
           viewport={{ once: false, amount: 0.1 }}
           className="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12"
         >
-          Ajouter un <span className="text-purple-600">Nouveau Cours</span>
+          Add a <span className="text-purple-600">New Course</span>
         </motion.h2>
 
         <motion.div
@@ -161,8 +163,8 @@ const Addcourseform = () => {
             {/* Machine Image Upload */}
             <Form.Item
               name="machineImage"
-              label={<span className="text-gray-800 font-medium">Image du Cours <span className="text-red-500">*</span></span>}
-              rules={[{ required: true, message: 'L\'image du cours est requise' }]}
+              label={<span className="text-gray-800 font-medium">Course Image <span className="text-red-500">*</span></span>}
+              rules={[{ required: true, message: 'Course image is required' }]}
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList || []}
             >
@@ -174,20 +176,20 @@ const Addcourseform = () => {
               >
                 <div className="flex flex-col items-center text-purple-600">
                   <PlusOutlined className="text-2xl" />
-                  <div className="mt-2 text-sm">Uploader</div>
+                  <div className="mt-2 text-sm">Upload</div>
                 </div>
               </Upload>
             </Form.Item>
 
             {/* Course Name */}
             <Form.Item
-              label={<span className="text-gray-800 font-medium">Nom du Cours <span className="text-red-500">*</span></span>}
+              label={<span className="text-gray-800 font-medium">Course Name <span className="text-red-500">*</span></span>}
               name="nom"
-              rules={[{ required: true, message: 'Veuillez entrer le nom du cours' }]}
+              rules={[{ required: true, message: 'Please enter the course name' }]}
             >
               <Input
                 className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-                placeholder="Entrez le nom du cours"
+                placeholder="Enter course name"
               />
             </Form.Item>
 
@@ -195,20 +197,53 @@ const Addcourseform = () => {
             <Form.Item
               label={<span className="text-gray-800 font-medium">Description <span className="text-red-500">*</span></span>}
               name="description"
-              rules={[{ required: true, message: 'Veuillez entrer une description' }]}
+              rules={[{ required: true, message: 'Please enter a description' }]}
             >
               <Input.TextArea
                 rows={4}
                 className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-                placeholder="Décrivez le cours"
+                placeholder="Describe the course"
+              />
+            </Form.Item>
+
+            {/* Required Skills */}
+            <Form.Item
+              label={<span className="text-gray-800 font-medium">Required Skills</span>}
+              name="requiredSkills"
+              rules={[{ required: false, message: 'Please enter required skills' }]}
+            >
+              <Select
+                mode="tags"
+                placeholder="Enter required skills (e.g., JavaScript, Python)"
+                className="w-full"
+                tokenSeparators={[',']}
+                allowClear
+              />
+            </Form.Item>
+
+            {/* Price */}
+            <Form.Item
+              label={<span className="text-gray-800 font-medium">Price ($) <span className="text-red-500">*</span></span>}
+              name="price"
+              rules={[
+                { required: true, message: 'Please enter the course price' },
+                { type: 'number', min: 0, message: 'Price must be non-negative' },
+              ]}
+            >
+              <InputNumber
+                min={0}
+                step={0.01}
+                precision={2}
+                className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
+                placeholder="Enter course price (e.g., 49.99)"
               />
             </Form.Item>
 
             {/* File Upload for Documents and Videos */}
             <Form.Item
               name="file"
-              label={<span className="text-gray-800 font-medium">Fichiers du Cours <span className="text-red-500">*</span></span>}
-              rules={[{ required: true, message: 'Veuillez uploader un fichier' }]}
+              label={<span className="text-gray-800 font-medium">Course Files <span className="text-red-500">*</span></span>}
+              rules={[{ required: true, message: 'Please upload a file' }]}
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList || []}
             >
@@ -221,7 +256,7 @@ const Addcourseform = () => {
                   icon={<UploadOutlined />}
                   className="flex items-center gap-2 rounded-lg border-gray-300 text-purple-600 hover:text-purple-700 hover:border-purple-600 transition-colors duration-200"
                 >
-                  Uploader plusieurs fichiers
+                  Upload multiple files
                 </Button>
               </Upload>
             </Form.Item>
@@ -234,7 +269,7 @@ const Addcourseform = () => {
                 loading={loading}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2 text-base font-semibold transition-colors duration-200"
               >
-                Ajouter le cours
+                Add Course
               </Button>
             </Form.Item>
           </Form>
@@ -252,7 +287,7 @@ const Addcourseform = () => {
             href="/getcours"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-semibold"
           >
-            <span>Retour à la liste des cours</span>
+            <span>Back to Course List</span>
             <FiArrowRight size={16} />
           </a>
         </motion.div>
