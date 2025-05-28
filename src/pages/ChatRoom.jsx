@@ -9,8 +9,7 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
   const sender = localStorage.getItem('sender');
   const role = localStorage.getItem('role');
-  console.log('role', role);
-
+ 
   useEffect(() => {
     // Fetch existing messages from server
     axios.get('http://localhost:4000/messages')

@@ -8,6 +8,7 @@ import {
     Teacher,
   } from "../components/index";
 import ChatApp from "./chatboat";
+import Recommendations from "./Recommendations";
   
 const Template = ()=> {
 
@@ -22,6 +23,7 @@ const Template = ()=> {
     
         <Courses />
         <Teacher/>
+        <Recommendations/>
         <ChatApp/>
        < Footer/>
   
