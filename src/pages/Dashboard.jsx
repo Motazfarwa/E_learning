@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaTrash, FaPlus, FaBars, FaUsers, FaChartBar, FaFileAlt, FaMoneyBillWave, FaUserShield, FaUser, FaSignOutAlt } from 'react-icons/fa';
@@ -270,58 +269,69 @@ const CourseStatistics = () => {
     animation: { duration: 1000, easing: 'easeOutQuart' }
   };
 
-  return (
-    <div className="mb-8">
-      <h2 className="text-xl font-bold text-gray-800 mb-6">Course Statistics</h2>
-      <Row gutter={[16, 16]}>
-        <Col span={12}>
-          <Card
-            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-            style={{ borderRadius: '1rem', border: 'none' }}
-            bodyStyle={{ padding: '1.5rem' }}
-          >
-            <div className="flex items-center justify-center flex-col">
-              <div className="w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-4">
-                <FaFileAlt className="text-2xl text-purple-600" />
-              </div>
-              <Statistic
-                title={<span className="text-gray-500">Total Courses</span>}
-                value={stats.totalCourses}
-                valueStyle={{ color: colors.primary, fontSize: '2.5rem', fontWeight: 'bold' }}
-                className="py-2"
-              />
+return (
+  <div className="mb-8">
+    <h2 className="text-xl font-bold text-gray-800 mb-6">Course Statistics</h2>
+    <Row gutter={[16, 16]}>
+      <Col span={12}>
+        <Card
+          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+          style={{ borderRadius: '1rem', border: 'none' }}
+          bodyStyle={{ padding: '1.5rem' }}
+        >
+          <div className="flex items-center justify-center flex-col">
+            <div className="w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-4">
+              <FaFileAlt className="text-2xl text-purple-600" />
             </div>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card
-            title={<span className="text-gray-700 font-medium">File Type Distribution</span>}
-            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-            style={{ borderRadius: '1rem', border: 'none' }}
-            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
-            bodyStyle={{ padding: '1.5rem' }}
-          >
-            <div style={{ height: '300px', padding: '10px' }}>
+            <Statistic
+              title={<span className="text-gray-500">Total Courses</span>}
+              value={stats?.totalCourses ?? 0}
+              valueStyle={{ color: colors.primary, fontSize: '2.5rem', fontWeight: 'bold' }}
+              className="py-2"
+            />
+          </div>
+        </Card>
+      </Col>
+
+      <Col span={12}>
+        <Card
+          title={<span className="text-gray-700 font-medium">File Type Distribution</span>}
+          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+          style={{ borderRadius: '1rem', border: 'none' }}
+          headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+          bodyStyle={{ padding: '1.5rem' }}
+        >
+          <div style={{ height: '300px', padding: '10px' }}>
+            {fileTypeDoughnutData ? (
               <Doughnut data={fileTypeDoughnutData} options={doughnutOptions} />
-            </div>
-          </Card>
-        </Col>
-        <Col span={24}>
-          <Card
-            title={<span className="text-gray-700 font-medium">Comments per Course</span>}
-            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-            style={{ borderRadius: '1rem', border: 'none' }}
-            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
-            bodyStyle={{ padding: '1.5rem' }}
-          >
-            <div style={{ height: '300px', padding: '10px' }}>
+            ) : (
+              <div>Loading...</div>
+            )}
+          </div>
+        </Card>
+      </Col>
+
+      <Col span={24}>
+        <Card
+          title={<span className="text-gray-700 font-medium">Comments per Course</span>}
+          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+          style={{ borderRadius: '1rem', border: 'none' }}
+          headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+          bodyStyle={{ padding: '1.5rem' }}
+        >
+          <div style={{ height: '300px', padding: '10px' }}>
+            {commentsBarData ? (
               <Bar data={commentsBarData} options={barOptions} />
-            </div>
-          </Card>
-        </Col>
-      </Row>
-    </div>
-  );
+            ) : (
+              <div>Loading...</div>
+            )}
+          </div>
+        </Card>
+      </Col>
+    </Row>
+  </div>
+);
+
 };
 
 // TransactionsTable Component
@@ -332,17 +342,20 @@ const TransactionsTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/payments`)
+useEffect(() => {
+    axios.get("http://localhost:4000/api/payments")
       .then((response) => {
-        setTransactions(response.data);
-        setFilteredTransactions(response.data);
+        console.log('Payments API response:', response);
+        // Check if data is in the expected format
+        const paymentsData = Array.isArray(response.data) ? response.data : 
+                            (response.data.payments || []);
+        setTransactions(paymentsData);
+        setFilteredTransactions(paymentsData);
         setLoading(false);
       })
       .catch((error) => {
         console.error('Error loading transactions:', error);
-        setError('Error loading transactions');
+        setError('Error loading transactions: ' + (error.response?.data?.message || error.message));
         setLoading(false);
       });
   }, []);
@@ -473,12 +486,15 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchUserStats = axios.get(`${API_BASE_URL}/users`);
     const fetchPaymentStats = axios.get(`${API_BASE_URL}/payments/stats`);
 
     Promise.all([fetchUserStats, fetchPaymentStats])
       .then(([userResponse, paymentResponse]) => {
+        console.log('User stats response:', userResponse.data);
+        console.log('Payment stats response:', paymentResponse.data);
+        
         const users = userResponse.data;
         const totalUsers = users.length;
         const apprenants = users.filter((user) => user.role === 'APPRENANT').length;
@@ -492,7 +508,19 @@ const Statistics = () => {
           experts,
         });
 
-        setPaymentStats(paymentResponse.data);
+        // Ensure payment stats has the expected structure
+          const payStats = paymentResponse.data || {};
+           const stats = payStats.stats || {};
+        console.log('payStats', payStats);
+          setPaymentStats({
+      totalAmount: Number(stats.totalAmount),
+      totalCount: Number(stats.totalCount),
+      averageAmount: Number(stats.averageAmount),
+      statusDistribution: stats.statusDistribution || {},
+      monthlyData: stats.monthlyData || [],
+    });
+ 
+
 
         setLoading(false);
       })
@@ -588,20 +616,20 @@ const Statistics = () => {
     animation: { duration: 1000, easing: 'easeOutQuart' },
   };
 
-  const paymentDoughnutData = {
-    labels: Object.keys(paymentStats.statusDistribution).map(key => 
-      key.charAt(0).toUpperCase() + key.slice(1)
-    ),
-    datasets: [
-      {
-        data: Object.values(paymentStats.statusDistribution),
-        backgroundColor: [colors.success, colors.warning],
-        hoverBackgroundColor: ['#4fd1c5', '#f6ad55'],
-        borderWidth: 2,
-        borderColor: '#ffffff',
-      },
-    ],
-  };
+const paymentDoughnutData = {
+  labels: Object.keys(paymentStats?.statusDistribution || {}).map(key => 
+    key.charAt(0).toUpperCase() + key.slice(1)
+  ),
+  datasets: [
+    {
+      data: Object.values(paymentStats?.statusDistribution || []),
+      backgroundColor: [colors.success, colors.warning],
+      hoverBackgroundColor: ['#4fd1c5', '#f6ad55'],
+      borderWidth: 2,
+      borderColor: '#ffffff',
+    },
+  ],
+};
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const date = new Date();
@@ -611,7 +639,8 @@ const Statistics = () => {
 
   const monthlyAmounts = months.map((month) => {
     const [year, monthNum] = month.split('-').map(Number);
-    const data = paymentStats.monthlyData.find(
+    // Add null check for monthlyData
+    const data = paymentStats.monthlyData && paymentStats.monthlyData.find(
       (item) => item.year === year && item.month === monthNum
     );
     return data ? data.totalAmount : 0;
@@ -673,7 +702,8 @@ const Statistics = () => {
     maintainAspectRatio: false,
     animation: { duration: 1000, easing: 'easeOutQuart' },
   };
-
+const formatAmount = (amount) =>
+  typeof amount === 'number' && !isNaN(amount) ? amount.toFixed(2) : '0.00';
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Overview</h2>
@@ -688,7 +718,7 @@ const Statistics = () => {
               <FaUsers className="text-2xl mr-2 text-purple-200" />
               <h3 className="text-lg font-medium">Users</h3>
             </div>
-            <div className="text-3xl font-bold mb-1">{userStats.totalUsers}</div>
+            <div className="text-3xl font-bold mb-1">{userStats.totalUsers || 0}</div>
             <div className="text-sm text-purple-200">Total registered users</div>
           </Card>
         </Col>
@@ -702,7 +732,7 @@ const Statistics = () => {
               <FaMoneyBillWave className="text-2xl mr-2 text-violet-200" />
               <h3 className="text-lg font-medium">Payments</h3>
             </div>
-            <div className="text-3xl font-bold mb-1">{paymentStats.totalCount}</div>
+          <div className="text-3xl font-bold mb-1">{paymentStats.totalCount || 0}</div>
             <div className="text-sm text-violet-200">Total transactions</div>
           </Card>
         </Col>
@@ -716,7 +746,7 @@ const Statistics = () => {
               <FaChartBar className="text-2xl mr-2 text-teal-200" />
               <h3 className="text-lg font-medium">Revenue</h3>
             </div>
-            <div className="text-3xl font-bold mb-1">{paymentStats.totalAmount.toFixed(2)} €</div>
+            <div className="text-3xl font-bold mb-1">{(paymentStats.totalAmount || 0).toFixed(2)} €</div>
             <div className="text-sm text-teal-200">Total revenue</div>
           </Card>
         </Col>
@@ -730,7 +760,7 @@ const Statistics = () => {
               <FaUserShield className="text-2xl mr-2 text-indigo-200" />
               <h3 className="text-lg font-medium">Average Payment</h3>
             </div>
-            <div className="text-3xl font-bold mb-1">{paymentStats.averageAmount.toFixed(2)} €</div>
+          {paymentStats?.averageAmount != null ? paymentStats.averageAmount.toFixed(2) + ' €' : 'N/A'}
             <div className="text-sm text-indigo-200">Average transaction value</div>
           </Card>
         </Col>
@@ -932,6 +962,8 @@ const AdminModal = ({ isOpen, onClose, onSubmit }) => {
 };
 
 // DataTable Component
+
+
 const DataTable = ({ role, title }) => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
@@ -982,7 +1014,6 @@ const DataTable = ({ role, title }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
@@ -993,18 +1024,6 @@ const DataTable = ({ role, title }) => {
               {data.length > 0 ? (
                 data.map((item) => (
                   <tr key={item._id} className="hover:bg-purple-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {item.profileImage ? (
-                        <img
-                          src={`${API_BASE_URL}${item.profileImage}`}
-                          alt="Profile"
-                          className="w-10 h-10 rounded-full object-cover"
-                          onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
-                        />
-                      ) : (
-                        'None'
-                      )}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{item.FullName || 'Not defined'}</div>
                     </td>
@@ -1027,7 +1046,7 @@ const DataTable = ({ role, title }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500">
                     No data available
                   </td>
                 </tr>
@@ -1039,8 +1058,8 @@ const DataTable = ({ role, title }) => {
     </div>
   );
 };
-
 // AdminTable Component
+
 const AdminTable = () => {
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -1065,14 +1084,12 @@ const AdminTable = () => {
   }, []);
 
   const handleAdd = (formData) => {
-    const data = new FormData();
-    data.append('FullName', formData.FullName);
-    data.append('email', formData.email);
-    data.append('password', formData.password);
-    data.append('role', 'ADMIN');
-    if (formData.profileImage) {
-      data.append('profileImage', formData.profileImage);
-    }
+    const data = {
+      FullName: formData.FullName,
+      email: formData.email,
+      password: formData.password,
+      role: 'ADMIN',
+    };
 
     axios
       .post(`${API_BASE_URL}/users`, data)
@@ -1126,7 +1143,6 @@ const AdminTable = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
@@ -1137,18 +1153,6 @@ const AdminTable = () => {
               {data.length > 0 ? (
                 data.map((item) => (
                   <tr key={item._id} className="hover:bg-purple-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {item.profileImage ? (
-                        <img
-                          src={`${API_BASE_URL}${item.profileImage}`}
-                          alt="Profile"
-                          className="w-10 h-10 rounded-full object-cover"
-                          onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
-                        />
-                      ) : (
-                        'None'
-                      )}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{item.FullName || 'Not defined'}</div>
                     </td>
@@ -1171,7 +1175,7 @@ const AdminTable = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500">
                     No data available
                   </td>
                 </tr>

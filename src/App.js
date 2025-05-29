@@ -30,7 +30,7 @@ import CourseRoom from './pages/CourseRoom';
 import ChatComponent from './pages/ChatComponent';
 import ChatRoom from './pages/ChatRoom';
 import CreateRoom from './pages/RoomGenerator';
-import Recommendations from './pages/Recommendations';
+import SkillBasedRecommendations from './pages/Recommendations';
 import CourseDetailsList from './pages/CourseDetailsList';
 
 
@@ -114,10 +114,7 @@ function App() {
     </ProtectedRoute>
   } 
 />
-  <Route
-            path="/recommendations" element={Recommendations}
-            
-          />
+  <Route path="/skill-based-recommendations" element={<SkillBasedRecommendations />} />
      </Routes>
       </div>
     </RoleProvider>

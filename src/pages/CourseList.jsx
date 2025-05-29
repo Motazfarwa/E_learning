@@ -311,6 +311,7 @@ const CourseList = () => {
               Mettre à jour le cours
             </Button>
           </Form.Item>
+          
         </Form>
       </Modal>
     </div>

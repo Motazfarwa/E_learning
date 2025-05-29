@@ -28,9 +28,9 @@ const Login = () => {
         if (response.data.role === "ADMIN") {
           navigate("/dashboard");
         } else if (response.data.role === "INSTRUCTEUR") {
-          navigate("/home");
+          navigate("/profile");
         } else {
-          navigate("/home"); // Default fallback
+          navigate("/profile"); // Default fallback
         }
 
         localStorage.setItem("sender", response.data.user.FullName);
