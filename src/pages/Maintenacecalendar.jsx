@@ -4,7 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { Input, DatePicker, Button, message, Card, Form, Layout } from "antd";
+import { Input, DatePicker, Button, message, Card, Form, Layout , InputNumber } from "antd";
 import { motion } from "framer-motion";
 import './Maintenacalendar.css';
 import { useNavigate } from "react-router-dom";
@@ -88,7 +88,7 @@ const CalendarComponent = () => {
       <Header style={{ backgroundColor: "#001529", padding: "0 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "100%" }}>
           <div style={{ color: "#fff", fontSize: "18px" }}>Meeting Scheduling System</div>
-          <Button type="primary">Logout</Button>
+          
         </div>
       </Header>
 
@@ -112,36 +112,116 @@ const CalendarComponent = () => {
           />
         </div>
 
-        <div style={{ flex: 1, border: "1px solid #ddd", borderRadius: "8px", padding: "20px" }}>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Card title="Schedule New Meeting" bordered={false}>
-              <Form form={form} layout="vertical" onFinish={handleAddMeeting}>
-                <Form.Item 
-                  label="Expert Email" 
-                  name="expert"
-                  rules={[{ required: true, message: "Please enter expert's email" }]}>
-                  <Input placeholder="Enter expert's email" type="email" />
-                </Form.Item>
+        <div style={{ 
+  width: "100%",
+  maxWidth: "500px",
+  border: "1px solid #f0f0f0",
+  borderRadius: "12px",
+  padding: "24px",
+  backgroundColor: "white",
+  boxShadow: "0 2px 10px rgba(124, 58, 237, 0.1)",
+  margin: "0 auto"
+}}>
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <h3 style={{
+      color: "#7C3AED",
+      fontSize: "1.25rem",
+      marginBottom: "24px",
+      textAlign: "center",
+      fontWeight: 600
+    }}>
+      New Meeting Request
+    </h3>
 
-             
+    <Form form={form} layout="vertical" onFinish={handleAddMeeting}>
+      {/* Champ 1: Expert Email */}
+      <div style={{ marginBottom: "24px" }}>
+        <Form.Item
+          label={<span style={{ fontWeight: 500 }}>Expert Email</span>}
+          name="expert"
+          rules={[{ required: true, message: "Expert email is required" }]}
+        >
+          <Input 
+            placeholder="expert@example.com" 
+            size="large"
+            style={{
+              borderRadius: "8px",
+              padding: "12px",
+              width: "100%"
+            }}
+          />
+        </Form.Item>
+      </div>
 
-                <Form.Item label="Meeting Time" name="timeRange" rules={[{ required: true }]}>
-                  <RangePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: '100%' }} />
-                </Form.Item>
+      {/* Champ 2: Date Range */}
+      <div style={{ marginBottom: "24px" }}>
+        <Form.Item
+          label={<span style={{ fontWeight: 500 }}>Meeting Date & Time</span>}
+          name="timeRange"
+          rules={[{ required: true, message: "Please select time range" }]}
+        >
+          <RangePicker 
+            showTime 
+            format="YYYY-MM-DD HH:mm"
+            style={{ width: "100%", padding: "11px" }}
+            size="large"
+          />
+        </Form.Item>
+      </div>
 
-                <Form.Item label="Duration (minutes)" name="duration">
-                  <Input type="number" min={15} max={120} />
-                </Form.Item>
+      {/* Champ 3: Duration */}
+      <div style={{ marginBottom: "32px" }}>
+        <Form.Item
+          label={<span style={{ fontWeight: 500 }}>Duration (minutes)</span>}
+          name="duration"
+          rules={[{ 
+            required: true, 
+            message: "Duration must be between 15-120 minutes",
+            type: "number",
+            min: 15,
+            max: 120 
+          }]}
+        >
+          <InputNumber 
+            min={15}
+            max={120}
+            style={{ 
+              width: "100%",
+              borderRadius: "8px",
+              padding: "8px 12px"
+            }}
+            size="large"
+          />
+        </Form.Item>
+      </div>
 
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" loading={loading} block>
-                    Schedule Meeting
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-          </motion.div>
-        </div>
+      {/* Bouton Submit */}
+      <Form.Item>
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          size="large"
+          block
+          style={{
+            height: "48px",
+            borderRadius: "8px",
+            backgroundColor: "#7C3AED",
+            borderColor: "#7C3AED",
+            fontSize: "1rem",
+            fontWeight: 500
+          }}
+          loading={loading}
+        >
+          Schedule Meeting
+        </Button>
+      </Form.Item>
+    </Form>
+  </motion.div>
+</div>
       </Content>
     </Layout>
   );

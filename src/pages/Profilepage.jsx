@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUser, FiLogOut, FiMail, FiEdit, FiUpload, FiBook, FiBookOpen, FiCalendar } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiMail, FiEdit, FiUpload, FiBook, FiBookOpen, FiCalendar , FiMessageSquare } from 'react-icons/fi';
 import logo from "../assets/51031-removebg-preview.png";
 
 const ProfilePage = () => {
@@ -150,19 +150,12 @@ const ProfilePage = () => {
       {/* Header */}
       <header className="bg-white shadow-md p-4 flex justify-between items-center fixed w-full top-0 z-20">
         <img className="w-10 h-7" src={logo} alt="Logo" />
-        <nav className="space-x-4">
-          <Link to="/" className="text-gray-700 hover:text-purple-600">Accueil</Link>
-          <Link to="/courses" className="text-gray-700 hover:text-purple-600">Cours</Link>
-          <Link to="/profile" className="text-gray-700 hover:text-purple-600">Profil</Link>
-        </nav>
+        
       </header>
 
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md p-4 fixed top-14 left-0 h-[calc(100vh-56px)] z-10 hidden md:block">
-        <div className="mb-6">
-          <FiUser className="w-6 h-6 text-purple-600 mb-2" />
-          <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
-        </div>
+        
         <nav className="space-y-2">
           <button
             onClick={() => setViewMode('view')}
@@ -181,19 +174,45 @@ const ProfilePage = () => {
             <FiEdit className="w-5 h-5 mr-2" /> Modifier
           </button>
           {user.role === 'APPRENANT' && (
-            <Link
-              to="/studentcalendar"
-              className="w-full flex items-center p-2 rounded-lg text-gray-600 hover:bg-gray-50"
-            >
-              <FiCalendar className="w-5 h-5 mr-2" /> Calendrier Apprenant
-            </Link>
-          )}
+  <>
+    <Link
+      to="/studentcalendar"
+      className="w-full flex items-center p-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200 mb-1"
+    >
+      <FiCalendar className="w-5 h-5 mr-3 text-purple-500" />
+      <span>Calendrier Apprenant</span>
+    </Link>
+    
+    <Link
+      to="/chat"
+      className="w-full flex items-center p-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
+    >
+      <FiMessageSquare className="w-5 h-5 mr-3 text-purple-500" />
+      <span>Chat Room</span>
+    </Link>
+    <Link
+      to="/skill"
+      className="w-full flex items-center p-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
+    >
+      <FiMessageSquare className="w-5 h-5 mr-3 text-purple-500" />
+      <span>Cours recommnadés</span>
+    </Link>
+  </>
+)}
           {user.role === 'EXPERT' && (
             <Link
               to="/calendar"
               className="w-full flex items-center p-2 rounded-lg text-gray-600 hover:bg-gray-50"
             >
               <FiCalendar className="w-5 h-5 mr-2" /> Calendrier Expert
+            </Link>
+          )}
+          {user.role === 'INSTRUCTEUR' && (
+            <Link
+              to="/chat"
+              className="w-full flex items-center p-2 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              <FiCalendar className="w-5 h-5 mr-2" /> Chat Room
             </Link>
           )}
           <button
@@ -237,26 +256,7 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Overview */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-medium text-gray-800 mb-4">Aperçu</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="text-purple-600 font-medium flex items-center">
-                    {user.role === 'APPRENANT' ? 'Cours Suivis' : 'Cours Créés'}
-                    <FiBook className="ml-2" />
-                  </div>
-                  <p className="text-xl font-bold">{user.stats.courses}</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="text-purple-600 font-medium flex items-center">
-                    Contributions
-                    <FiBookOpen className="ml-2" />
-                  </div>
-                  <p className="text-xl font-bold">{user.stats.contributions}</p>
-                </div>
-              </div>
-            </div>
+           
 
             {/* About and Skills */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -346,83 +346,92 @@ const ProfilePage = () => {
                 {error}
               </div>
             )}
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-1">Image de Profil</label>
-                <div className="flex items-center space-x-4">
-                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                    {editForm.profileImage ? (
-                      <img
-                        src={URL.createObjectURL(editForm.profileImage)}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : user.profileImage ? (
-                      <img
-                        src={`${BACKEND_URL}${user.profileImage}`}
-                        alt={user.FullName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <FiUser className="w-10 h-10 text-gray-400" />
-                    )}
-                  </div>
-                  <label className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700">
-                    <FiUpload className="w-5 h-5 mr-2" />
-                    Choisir
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1">Nom Complet</label>
-                <input
-                  type="text"
-                  value={editForm.fullName}
-                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-1 focus:ring-purple-200 bg-white text-gray-800"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1">Bio</label>
-                <textarea
-                  value={editForm.bio}
-                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-1 focus:ring-purple-200 bg-white text-gray-800"
-                  rows="4"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1">Compétences (séparées par des virgules)</label>
-                <input
-                  type="text"
-                  value={editForm.skills}
-                  onChange={(e) => setEditForm({ ...editForm, skills: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-1 focus:ring-purple-200 bg-white text-gray-800"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('view')}
-                  className="px-3 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                >
-                  Enregistrer
-                </button>
-              </div>
-            </form>
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-6">
+  {/* Image de Profil - Version haute */}
+  <div className="flex flex-col gap-4">
+    <label className="text-lg font-medium text-gray-800">Image de Profil</label>
+    <div className="flex items-center gap-6">
+      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+        {editForm.profileImage ? (
+          <img
+            src={URL.createObjectURL(editForm.profileImage)}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+        ) : user.profileImage ? (
+          <img
+            src={`${BACKEND_URL}${user.profileImage}`}
+            alt={user.FullName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <FiUser className="w-12 h-12 text-gray-400" />
+        )}
+      </div>
+      <label className="flex items-center px-4 py-3 bg-purple-600 text-white rounded-xl cursor-pointer hover:bg-purple-700 transition-colors">
+        <FiUpload className="w-6 h-6 mr-3" />
+        <span className="text-lg">Choisir une image</span>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+        />
+      </label>
+    </div>
+  </div>
+
+  {/* Nom Complet - Version haute */}
+  <div className="flex flex-col gap-2">
+    <label className="text-lg font-medium text-gray-800">Nom Complet</label>
+    <input
+      type="text"
+      value={editForm.fullName}
+      onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+      className="w-full p-4 text-lg rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white text-gray-800"
+      required
+    />
+  </div>
+
+  {/* Bio - Version haute */}
+  <div className="flex flex-col gap-2">
+    <label className="text-lg font-medium text-gray-800">Bio</label>
+    <textarea
+      value={editForm.bio}
+      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+      className="w-full p-4 text-lg rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white text-gray-800 min-h-[150px]"
+      rows="4"
+    />
+  </div>
+
+  {/* Compétences - Version haute */}
+  <div className="flex flex-col gap-2">
+    <label className="text-lg font-medium text-gray-800">Compétences (séparées par des virgules)</label>
+    <input
+      type="text"
+      value={editForm.skills}
+      onChange={(e) => setEditForm({ ...editForm, skills: e.target.value })}
+      className="w-full p-4 text-lg rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white text-gray-800"
+    />
+  </div>
+
+  {/* Boutons - Version haute */}
+  <div className="flex justify-end gap-4 mt-6">
+    <button
+      type="button"
+      onClick={() => setViewMode('view')}
+      className="px-6 py-3 bg-gray-200 text-gray-800 text-lg font-medium rounded-xl hover:bg-gray-300 transition-colors"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      className="px-6 py-3 bg-purple-600 text-white text-lg font-medium rounded-xl hover:bg-purple-700 transition-colors shadow-md"
+    >
+      Enregistrer les modifications
+    </button>
+  </div>
+</form>
           </div>
         )}
       </main>

@@ -69,134 +69,128 @@ const Register = () => {
 
       {/* Right Section */}
       <div className="md:w-1/2 flex items-center justify-center p-6 md:p-12">
-        <div
-          className="w-full max-w-md bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 animate-fade-in"
-          style={{
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-          }}
-        >
-          <img
-            src={logologin}
-            alt="Register Logo"
-            className="w-32 h-32 mx-auto mb-6"
-            style={{ borderRadius: "50%" }}
-          />
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            {/* FullName Field */}
-            <div className="relative">
-              <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                id="FullName"
-                value={FullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white bg-opacity-50 text-gray-800 placeholder-gray-400 transition-all"
-                required
-              />
-            </div>
-
-            {/* Email Field */}
-            <div className="relative">
-              <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white bg-opacity-50 text-gray-800 placeholder-gray-400 transition-all"
-                required
-              />
-            </div>
-
-            {/* Password Field */}
-            <div className="relative">
-              <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white bg-opacity-50 text-gray-800 placeholder-gray-400 transition-all"
-                required
-              />
-            </div>
-
-            {/* Role Dropdown */}
-            <div className="relative">
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white bg-opacity-50 text-gray-800 placeholder-gray-400 transition-all appearance-none"
-                required
-              >
-                <option value="" disabled>
-                  Select your role
-                </option>
-                <option value="ADMIN">Admin</option>
-                <option value="INSTRUCTEUR">Instructeur</option>
-                <option value="APPRENANT">Apprenant</option>
-                <option value="EXPERT">Expert</option>
-              </select>
-              <svg
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all font-medium shadow-md"
-            >
-              Sign Up
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-gray-600">
-            Already have an account?{" "}
-            <a
-              href="/login"
-              className="text-purple-600 hover:text-purple-800 font-medium"
-            >
-              Sign In
-            </a>
-          </p>
+  <div
+    className="w-full max-w-md bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 animate-fade-in"
+    style={{ border: "1px solid rgba(255, 255, 255, 0.2)" }}
+  >
+    <img
+      src={logologin}
+      alt="Register Logo"
+      className="w-40 h-40 mx-auto mb-12"  // Logo plus grand
+      style={{ borderRadius: "50%" }}
+    />
+    
+    <form onSubmit={handleSubmit} className="flex flex-col gap-10">  
+      {/* Error Message - Version agrandie */}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-5 rounded-xl flex items-center text-lg">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-7 w-7 mr-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          {error}
         </div>
+      )}
+
+      {/* FullName Field - Version haute */}
+      <div className="relative">
+        <FaUser className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl" />
+        <input
+          type="text"
+          id="FullName"
+          value={FullName}
+          onChange={(e) => setFullName(e.target.value)}
+          placeholder="Full Name"
+          className="w-full pl-16 pr-6 py-7 text-2xl rounded-2xl bg-white text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-purple-200 transition-all"
+          required
+        />
       </div>
+
+      {/* Email Field - Version haute */}
+      <div className="relative">
+        <FaUser className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl" />
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="w-full pl-16 pr-6 py-7 text-2xl rounded-2xl bg-white text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-purple-200 transition-all"
+          required
+        />
+      </div>
+
+      {/* Password Field - Version haute */}
+      <div className="relative">
+        <FaLock className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl" />
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full pl-16 pr-6 py-7 text-2xl rounded-2xl bg-white text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-purple-200 transition-all"
+          required
+        />
+      </div>
+
+      {/* Role Dropdown - Version haute */}
+      <div className="relative">
+        <select
+          id="role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full pl-16 pr-10 py-7 text-2xl rounded-2xl bg-white text-gray-800 placeholder-gray-400 border-none focus:ring-4 focus:ring-purple-200 transition-all appearance-none"
+          required
+        >
+          <option value="" disabled>Select your role</option>
+          <option value="INSTRUCTEUR">Instructeur</option>
+          <option value="APPRENANT">Apprenant</option>
+          <option value="EXPERT">Expert</option>
+        </select>
+        <svg
+          className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl h-7 w-7"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+
+      {/* Bouton - Version compacte */}
+      <button
+        type="submit"
+        className="w-full py-5 text-xl bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-2xl hover:from-purple-700 hover:to-purple-800 transition-all font-bold shadow-xl mt-4"
+      >
+        SIGN UP
+      </button>
+    </form>
+
+    <p className="mt-12 text-center text-gray-600 text-xl">
+      Already have an account?{" "}
+      <a href="/login" className="text-purple-600 hover:text-purple-800 font-bold">
+        Sign In
+      </a>
+    </p>
+  </div>
+</div>
     </div>
   );
 };

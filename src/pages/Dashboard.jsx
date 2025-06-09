@@ -180,34 +180,47 @@ const CourseStatistics = () => {
     axios
       .get(`${API_BASE_URL}/courses/stats`)
       .then((response) => {
-        setStats(response.data);
+        console.log('Course stats response:', response.data); // Debug API response
+        setStats({
+          totalCourses: response.data.totalCourses || 0,
+          fileTypeDistribution: response.data.fileTypeDistribution || [],
+          commentsByCourse: response.data.commentsByCourse || []
+        });
         setLoading(false);
       })
       .catch((error) => {
         console.error('Error loading course statistics:', error);
-        setError('Error loading course statistics');
+        setError('Error loading course statistics: ' + (error.response?.data?.message || error.message));
         setLoading(false);
       });
   }, []);
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
-        <p className="text-purple-600 font-medium">Loading statistics...</p>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full bg-purple-200 mb-4"></div>
+          <p className="text-purple-600 font-medium">Loading statistics...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (error) return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
+  if (error) {
+    return <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">{error}</div>;
+  }
 
   const fileTypeDoughnutData = {
-    labels: stats.fileTypeDistribution.map((type) => type._id),
+    labels: stats.fileTypeDistribution?.length > 0 ? stats.fileTypeDistribution.map((type) => type._id) : ['No Data'],
     datasets: [
       {
-        data: stats.fileTypeDistribution.map((type) => type.count),
-        backgroundColor: [colors.chart.primary, colors.chart.secondary, colors.chart.tertiary],
-        hoverBackgroundColor: [colors.chart.quaternary, '#9333ea', '#7e22ce'],
+        data: stats.fileTypeDistribution?.length > 0 ? stats.fileTypeDistribution.map((type) => type.count) : [1],
+        backgroundColor: stats.fileTypeDistribution?.length > 0 
+          ? [colors.chart.primary, colors.chart.secondary, colors.chart.tertiary]
+          : [colors.text.light],
+        hoverBackgroundColor: stats.fileTypeDistribution?.length > 0 
+          ? [colors.chart.quaternary, '#9333ea', '#7e22ce']
+          : [colors.text.light],
         borderWidth: 2,
         borderColor: '#ffffff'
       }
@@ -231,11 +244,11 @@ const CourseStatistics = () => {
   };
 
   const commentsBarData = {
-    labels: stats.commentsByCourse.map((course) => course.nom),
+    labels: stats.commentsByCourse?.length > 0 ? stats.commentsByCourse.map((course) => course.nom) : ['No Data'],
     datasets: [
       {
         label: 'Number of Comments',
-        data: stats.commentsByCourse.map((course) => course.commentCount),
+        data: stats.commentsByCourse?.length > 0 ? stats.commentsByCourse.map((course) => course.commentCount) : [0],
         backgroundColor: colors.chart.primary,
         borderColor: colors.chart.secondary,
         borderWidth: 1,
@@ -269,68 +282,59 @@ const CourseStatistics = () => {
     animation: { duration: 1000, easing: 'easeOutQuart' }
   };
 
-return (
-  <div className="mb-8">
-    <h2 className="text-xl font-bold text-gray-800 mb-6">Course Statistics</h2>
-    <Row gutter={[16, 16]}>
-      <Col span={12}>
-        <Card
-          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-          style={{ borderRadius: '1rem', border: 'none' }}
-          bodyStyle={{ padding: '1.5rem' }}
-        >
-          <div className="flex items-center justify-center flex-col">
-            <div className="w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-4">
-              <FaFileAlt className="text-2xl text-purple-600" />
+  return (
+    <div className="mb-8">
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Course Statistics</h2>
+      <Row gutter={[16, 16]}>
+        <Col span={12}>
+          <Card
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div className="flex items-center justify-center flex-col">
+              <div className="w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-4">
+                <FaFileAlt className="text-2xl text-purple-600" />
+              </div>
+              <Statistic
+                title={<span className="text-gray-500">Total Courses</span>}
+                value={stats.totalCourses || 0}
+                valueStyle={{ color: colors.primary, fontSize: '2.5rem', fontWeight: 'bold' }}
+                className="py-2"
+              />
             </div>
-            <Statistic
-              title={<span className="text-gray-500">Total Courses</span>}
-              value={stats?.totalCourses ?? 0}
-              valueStyle={{ color: colors.primary, fontSize: '2.5rem', fontWeight: 'bold' }}
-              className="py-2"
-            />
-          </div>
-        </Card>
-      </Col>
-
-      <Col span={12}>
-        <Card
-          title={<span className="text-gray-700 font-medium">File Type Distribution</span>}
-          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-          style={{ borderRadius: '1rem', border: 'none' }}
-          headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
-          bodyStyle={{ padding: '1.5rem' }}
-        >
-          <div style={{ height: '300px', padding: '10px' }}>
-            {fileTypeDoughnutData ? (
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card
+            title={<span className="text-gray-700 font-medium">File Type Distribution</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div style={{ height: '300px', padding: '10px' }}>
               <Doughnut data={fileTypeDoughnutData} options={doughnutOptions} />
-            ) : (
-              <div>Loading...</div>
-            )}
-          </div>
-        </Card>
-      </Col>
-
-      <Col span={24}>
-        <Card
-          title={<span className="text-gray-700 font-medium">Comments per Course</span>}
-          className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-          style={{ borderRadius: '1rem', border: 'none' }}
-          headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
-          bodyStyle={{ padding: '1.5rem' }}
-        >
-          <div style={{ height: '300px', padding: '10px' }}>
-            {commentsBarData ? (
+            </div>
+          </Card>
+        </Col>
+        <Col span={24}>
+          <Card
+            title={<span className="text-gray-700 font-medium">Comments per Course</span>}
+            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            style={{ borderRadius: '1rem', border: 'none' }}
+            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
+            bodyStyle={{ padding: '1.5rem' }}
+          >
+            <div style={{ height: '300px', padding: '10px' }}>
               <Bar data={commentsBarData} options={barOptions} />
-            ) : (
-              <div>Loading...</div>
-            )}
-          </div>
-        </Card>
-      </Col>
-    </Row>
-  </div>
-);
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+
 
 };
 
@@ -777,19 +781,7 @@ const formatAmount = (amount) =>
             </div>
           </Card>
         </Col>
-        <Col span={12}>
-          <Card
-            title={<span className="text-gray-700 font-medium">Users by Role</span>}
-            className="rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-            style={{ borderRadius: '1rem', border: 'none' }}
-            headStyle={{ borderBottom: '1px solid #f0f0f0', padding: '1rem 1.5rem' }}
-            bodyStyle={{ padding: '1.5rem' }}
-          >
-            <div style={{ height: '300px', padding: '10px' }}>
-              <Bar data={userBarData} options={barOptions} />
-            </div>
-          </Card>
-        </Col>
+        
         <Col span={12}>
           <Card
             title={<span className="text-gray-700 font-medium">Payment Status Distribution</span>}
@@ -1206,10 +1198,7 @@ const Dashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleProfile = () => {
-    setIsSidebarOpen(false);
-    navigate('/profile');
-  };
+  
 
   const handleLogout = () => {
     // Clear authentication token (adjust key based on your setup)
@@ -1271,14 +1260,7 @@ const Dashboard = () => {
           >
             <FaFileAlt className="mr-2" /> Courses
           </div>
-          <div
-            onClick={handleProfile}
-            className={`p-3 rounded-lg cursor-pointer flex items-center ${
-              activeTab === 'profile' ? 'bg-purple-600' : 'hover:bg-purple-700'
-            }`}
-          >
-            <FaUser className="mr-2" /> Profile
-          </div>
+          
         </nav>
         <div className="p-2">
           <div

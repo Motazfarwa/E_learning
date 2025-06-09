@@ -83,7 +83,7 @@ const handleStatusUpdate = async (status) => {
       <Header style={{ backgroundColor: "#001529", padding: "0 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "100%" }}>
           <div style={{ color: "#fff", fontSize: "18px" }}>Student calendar</div>
-          <Button type="primary">Logout</Button>
+          
         </div>
       </Header>
 

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 import { RoleContext } from './RoleContext';
 import logo from '../assets/51031-removebg-preview.png';
+import ChatApp from "./chatboat";
 
 // Background image array for a modern, beautiful landscape
 const backgroundImages = [
@@ -109,11 +110,7 @@ const Addcourseform = () => {
       {/* Header */}
       <header className="relative z-20 bg-white/95 backdrop-blur-md shadow-lg p-4 flex justify-between items-center w-full">
         <img className="w-14 h-10" src={logo} alt="Logo" />
-        <nav className="hidden md:flex space-x-8">
-          <a href="/Ajoutercour" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Add Courses</a>
-          <a href="/cours/:id" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Course Details</a>
-          <a href="/getcours" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Course List</a>
-        </nav>
+        
         <button className="md:hidden text-gray-800 text-2xl" onClick={toggleMenu}>
           {isOpen ? <FiX /> : <FiMenu />}
         </button>
@@ -148,122 +145,131 @@ const Addcourseform = () => {
         </motion.h2>
 
         <motion.div
-          variants={fadeIn('up', 0.3)}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: false, amount: 0.1 }}
-          className="bg-white rounded-2xl shadow-xl p-6"
+  variants={fadeIn('up', 0.3)}
+  initial="hidden"
+  whileInView="show"
+  viewport={{ once: false, amount: 0.1 }}
+  className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-3xl mx-auto my-8"
+>
+  <Form
+    form={form}
+    onFinish={onFinish}
+    layout="vertical"
+    className="grid gap-6" // Changement ici pour utiliser grid
+  >
+    {/* Machine Image Upload */}
+    <div className="col-span-full"> {/* Force le plein width */}
+      <Form.Item
+        name="machineImage"
+        label={<span className="text-gray-800 font-medium text-lg">Course Image <span className="text-red-500">*</span></span>}
+        rules={[{ required: true, message: 'Course image is required' }]}
+        valuePropName="fileList"
+        getValueFromEvent={(e) => e?.fileList || []}
+      >
+        <Upload
+          listType="picture-card"
+          beforeUpload={() => false}
+          maxCount={1}
+          className="w-full h-40 flex items-center justify-center" // Taille fixe pour l'upload
         >
-          <Form
-            form={form}
-            onFinish={onFinish}
-            layout="vertical"
-            className="space-y-6"
+          <div className="flex flex-col items-center text-purple-600 p-4">
+            <PlusOutlined className="text-3xl" />
+            <div className="mt-2 text-base">Upload</div>
+          </div>
+        </Upload>
+      </Form.Item>
+    </div>
+
+    {/* Course Name */}
+    <div className="col-span-full">
+      <Form.Item
+        label={<span className="text-gray-800 font-medium text-lg">Course Name <span className="text-red-500">*</span></span>}
+        name="nom"
+        rules={[{ required: true, message: 'Please enter the course name' }]}
+      >
+        <Input
+          className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600 h-12 text-lg px-4"
+          placeholder="Enter course name"
+        />
+      </Form.Item>
+    </div>
+
+    {/* Description */}
+    <div className="col-span-full">
+      <Form.Item
+        label={<span className="text-gray-800 font-medium text-lg">Description <span className="text-red-500">*</span></span>}
+        name="description"
+        rules={[{ required: true, message: 'Please enter a description' }]}
+      >
+        <Input.TextArea
+          rows={5}
+          className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600 text-lg p-4"
+          placeholder="Describe the course"
+        />
+      </Form.Item>
+    </div>
+
+    {/* Deux champs côte à côte */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-full">
+      {/* Required Skills */}
+      <div className="col-span-1">
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-lg">Required Skills</span>}
+          name="requiredSkills"
+        >
+          <Select
+            mode="tags"
+            placeholder="Skills (JavaScript, Python)"
+            className="w-full text-lg h-12"
+            tokenSeparators={[',']}
+            dropdownStyle={{ zIndex: 2000 }}
+          />
+        </Form.Item>
+      </div>
+
+      {/* Price */}
+      <div className="col-span-1">
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-lg">Price ($) <span className="text-red-500">*</span></span>}
+          name="price"
+          rules={[
+            { required: true, message: 'Please enter the price' },
+            { type: 'number', min: 0, message: 'Price must be positive' }
+          ]}
+        >
+          <InputNumber
+            min={0}
+            className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600 h-12 text-lg"
+            placeholder="0.00"
+          />
+        </Form.Item>
+      </div>
+    </div>
+
+    {/* File Upload */}
+    <div className="col-span-full">
+      <Form.Item
+        name="file"
+        label={<span className="text-gray-800 font-medium text-lg">Course Files <span className="text-red-500">*</span></span>}
+        rules={[{ required: true, message: 'Please upload files' }]}
+        valuePropName="fileList"
+        getValueFromEvent={(e) => e?.fileList || []}
+      >
+        <Upload
+          beforeUpload={() => false}
+          multiple
+          className="w-full"
+        >
+          <Button
+            icon={<UploadOutlined />}
+            className="w-full flex items-center justify-center gap-2 rounded-lg border-gray-300 text-purple-600 hover:text-purple-700 hover:border-purple-600 h-12 text-lg"
+            size="large"
           >
-            {/* Machine Image Upload */}
-            <Form.Item
-              name="machineImage"
-              label={<span className="text-gray-800 font-medium">Course Image <span className="text-red-500">*</span></span>}
-              rules={[{ required: true, message: 'Course image is required' }]}
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList || []}
-            >
-              <Upload
-                listType="picture-card"
-                beforeUpload={() => false}
-                maxCount={1}
-                className="upload-custom"
-              >
-                <div className="flex flex-col items-center text-purple-600">
-                  <PlusOutlined className="text-2xl" />
-                  <div className="mt-2 text-sm">Upload</div>
-                </div>
-              </Upload>
-            </Form.Item>
-
-            {/* Course Name */}
-            <Form.Item
-              label={<span className="text-gray-800 font-medium">Course Name <span className="text-red-500">*</span></span>}
-              name="nom"
-              rules={[{ required: true, message: 'Please enter the course name' }]}
-            >
-              <Input
-                className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-                placeholder="Enter course name"
-              />
-            </Form.Item>
-
-            {/* Description */}
-            <Form.Item
-              label={<span className="text-gray-800 font-medium">Description <span className="text-red-500">*</span></span>}
-              name="description"
-              rules={[{ required: true, message: 'Please enter a description' }]}
-            >
-              <Input.TextArea
-                rows={4}
-                className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-                placeholder="Describe the course"
-              />
-            </Form.Item>
-
-            {/* Required Skills */}
-            <Form.Item
-              label={<span className="text-gray-800 font-medium">Required Skills</span>}
-              name="requiredSkills"
-              rules={[{ required: false, message: 'Please enter required skills' }]}
-            >
-              <Select
-                mode="tags"
-                placeholder="Enter required skills (e.g., JavaScript, Python)"
-                className="w-full"
-                tokenSeparators={[',']}
-                allowClear
-              />
-            </Form.Item>
-
-            {/* Price */}
-            <Form.Item
-              label={<span className="text-gray-800 font-medium">Price ($) <span className="text-red-500">*</span></span>}
-              name="price"
-              rules={[
-                { required: true, message: 'Please enter the course price' },
-                { type: 'number', min: 0, message: 'Price must be non-negative' },
-              ]}
-            >
-              <InputNumber
-                min={0}
-                step={0.01}
-                precision={2}
-                className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-                placeholder="Enter course price (e.g., 49.99)"
-              />
-            </Form.Item>
-
-            {/* File Upload for Documents and Videos */}
-            <Form.Item
-              name="file"
-              label={<span className="text-gray-800 font-medium">Course Files <span className="text-red-500">*</span></span>}
-              rules={[{ required: true, message: 'Please upload a file' }]}
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList || []}
-            >
-              <Upload
-                beforeUpload={() => false}
-                multiple
-                className="upload-custom"
-              >
-                <Button
-                  icon={<UploadOutlined />}
-                  className="flex items-center gap-2 rounded-lg border-gray-300 text-purple-600 hover:text-purple-700 hover:border-purple-600 transition-colors duration-200"
-                >
-                  Upload multiple files
-                </Button>
-              </Upload>
-            </Form.Item>
-
-            {/* Submit Button */}
-            <Form.Item>
-              <Button
+            Upload Files
+          </Button>
+        </Upload>
+      </Form.Item>
+      <Button
                 type="primary"
                 htmlType="submit"
                 loading={loading}
@@ -271,9 +277,12 @@ const Addcourseform = () => {
               >
                 Add Course
               </Button>
-            </Form.Item>
-          </Form>
-        </motion.div>
+    </div>
+
+    {/* Submit Button */}
+    
+  </Form>
+</motion.div>
 
         {/* Back to Courses Link */}
         <motion.div
@@ -292,6 +301,7 @@ const Addcourseform = () => {
           </a>
         </motion.div>
       </div>
+       <ChatApp/>
     </div>
   );
 };

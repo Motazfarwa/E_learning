@@ -5,6 +5,7 @@ import { Modal, Input, Form, Button } from 'antd';
 import { motion } from 'framer-motion';
 import { FiTrash2, FiEdit, FiEye, FiMenu, FiX, FiArrowRight } from 'react-icons/fi';
 import logo from "../assets/51031-removebg-preview.png";
+import ChatApp from "./chatboat";
 
 // Background image array for a modern, beautiful landscape
 const backgroundImages = [
@@ -140,31 +141,9 @@ const CourseList = () => {
       </div>
 
       {/* Header */}
-      <header className="relative z-20 bg-white/95 backdrop-blur-md shadow-lg p-4 flex justify-between items-center w-full">
-        <img className="w-14 h-10" src={logo} alt="Logo" />
-        <nav className="hidden md:flex space-x-8">
-          <a href="/Ajoutercour" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Ajouter des cours</a>
-          <a href="/cours" className="text-gray-800 font-semibold hover:text-purple-600 transition-colors duration-300">Détails de cours</a>
-        </nav>
-        <button className="md:hidden text-gray-800 text-2xl" onClick={toggleMenu}>
-          {isOpen ? <FiX /> : <FiMenu />}
-        </button>
-      </header>
-
-      {/* Sidebar Navigation */}
-      {isOpen && (
-        <motion.div
-          initial={{ x: '-100%' }}
-          animate={{ x: 0 }}
-          transition={{ type: 'tween', duration: 0.3 }}
-          className="fixed top-16 left-0 h-full w-64 bg-white shadow-2xl p-6 z-30 md:hidden"
-        >
-          <ul className="space-y-6 text-gray-800">
-            <li><a href="/Ajoutercour" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Ajouter des cours</a></li>
-            <li><a href="/cours" className="block font-semibold hover:text-purple-600 transition-colors duration-300">Détails de cours</a></li>
-          </ul>
-        </motion.div>
-      )}
+      
+      
+      
 
       {/* Main Content */}
       <div className="relative z-10 pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,6 +212,10 @@ const CourseList = () => {
                       </button>
                     </div>
                   </div>
+                  <div className="mb-3">
+                    <strong className="text-gray-800">Prix :</strong>{" "}
+                    {machine.isPaid ? `${machine.price} TND` : "Gratuit"}
+                  </div>
                 </div>
               </motion.div>
             ))
@@ -260,61 +243,85 @@ const CourseList = () => {
       </div>
 
       {/* Modal for updating machine */}
-      <Modal
-        title={<span className="text-2xl font-bold text-gray-900">Modifier le Cours</span>}
-        open={showModal}
-        onCancel={() => setShowModal(false)}
-        footer={null}
-        className="rounded-2xl"
+<Modal
+      title={<span className="text-2xl font-bold text-gray-900">Modifier le Cours</span>}
+      open={showModal}
+      onCancel={() => setShowModal(false)}
+      footer={null}
+      className="rounded-2xl"
+      width={800} // Increased modal width
+      bodyStyle={{ padding: '2rem' }} // More padding for content
+    >
+      <Form
+        initialValues={{
+          nom: currentMachine?.nom,
+          description: currentMachine?.description,
+        }}
+        onFinish={handleFormSubmit}
+        className="space-y-8 p-4"
+        layout="vertical" // Ensure vertical layout for labels and inputs
       >
-        <Form
-          initialValues={{
-            nom: currentMachine?.nom,
-            description: currentMachine?.description,
-          }}
-          onFinish={handleFormSubmit}
-          className="space-y-6 p-4"
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-base">Nom du Cours</span>}
+          name="nom"
+          rules={[{ required: true, message: 'Veuillez entrer le nom du cours' }]}
         >
-          <Form.Item label={<span className="text-gray-800 font-medium">Nom du Cours</span>} name="nom">
-            <Input
-              defaultValue={currentMachine?.nom}
-              className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-            />
-          </Form.Item>
-          <Form.Item label={<span className="text-gray-800 font-medium">Description</span>} name="description">
-            <Input.TextArea
-              defaultValue={currentMachine?.description}
-              rows={4}
-              className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600"
-            />
-          </Form.Item>
-          <Form.Item label={<span className="text-gray-800 font-medium">Image du Cours</span>} name="courseimagefile">
-            <input
-              type="file"
-              onChange={(e) => setNewImageFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 transition-colors duration-200"
-            />
-          </Form.Item>
-          <Form.Item label={<span className="text-gray-800 font-medium">Fichier du Cours</span>} name="file">
-            <input
-              type="file"
-              onChange={(e) => setNewFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 transition-colors duration-200"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2 text-base font-semibold transition-colors duration-200"
-            >
-              Mettre à jour le cours
-            </Button>
-          </Form.Item>
-          
-        </Form>
-      </Modal>
+          <Input
+            defaultValue={currentMachine?.nom}
+            className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600 h-12 text-base"
+            placeholder="Entrez le nom du cours"
+          />
+        </Form.Item>
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-base">Description</span>}
+          name="description"
+          rules={[{ required: true, message: 'Veuillez entrer une description' }]}
+        >
+          <Input.TextArea
+            defaultValue={currentMachine?.description}
+            rows={6}
+            className="rounded-lg border-gray-300 focus:ring-2 focus:ring-purple-600 text-base"
+            placeholder="Entrez la description du cours"
+          />
+        </Form.Item>
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-base">Image du Cours</span>}
+          name="courseimagefile"
+        >
+          <input
+            type="file"
+            onChange={(e) => setNewImageFile(e.target.files[0])}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 transition-colors duration-200"
+            accept="image/*"
+          />
+        </Form.Item>
+        <Form.Item
+          label={<span className="text-gray-800 font-medium text-base">Fichier du Cours</span>}
+          name="file"
+        >
+          <input
+            type="file"
+            onChange={(e) => setNewFile(e.target.files[0])}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 transition-colors duration-200"
+            accept=".pdf,.mp4,.zip"
+          />
+        </Form.Item>
+        
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-6 text-lg font-semibold transition-colors duration-200"
+            size="large"
+          >
+            Mettre à jour le cours
+          </Button>
+        </Form.Item>
+      </Form>
+    </Modal>
+      <ChatApp />
     </div>
+    
   );
 };
 

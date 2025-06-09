@@ -30,7 +30,7 @@ import CourseRoom from './pages/CourseRoom';
 import ChatComponent from './pages/ChatComponent';
 import ChatRoom from './pages/ChatRoom';
 import CreateRoom from './pages/RoomGenerator';
-import SkillBasedRecommendations from './pages/Recommendations';
+import RecommendedCourses from './pages/Recommendations';
 import CourseDetailsList from './pages/CourseDetailsList';
 
 
@@ -70,7 +70,7 @@ function App() {
 
                 path="/meetings/:meetingId" 
                 element={
-                  <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR' ,'EXPERT']}>
+                  <ProtectedRoute allowedRoles={['ADMIN', 'INSTRUCTEUR' ,'EXPERT','APPRENANT']}>
                     <ErrorBoundaryWrapper> {/* Specific boundary for meeting page */}
                       <MeetingPage />
                     </ErrorBoundaryWrapper>
@@ -114,7 +114,7 @@ function App() {
     </ProtectedRoute>
   } 
 />
-  <Route path="/skill-based-recommendations" element={<SkillBasedRecommendations />} />
+  <Route path="/skill" element={<RecommendedCourses />} />
      </Routes>
       </div>
     </RoleProvider>

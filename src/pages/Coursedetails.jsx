@@ -88,31 +88,13 @@ const CourseDetails = () => {
           {collapsed ? <FiMenu /> : <FiX />}
         </button>
         <nav className="hidden md:flex space-x-4">
-          <Link to="/" className="text-gray-800 font-medium hover:text-purple-600">Accueil</Link>
-          <Link to="/courses" className="text-gray-800 font-medium hover:text-purple-600">Cours</Link>
+          
+          
           <Link to="/profile" className="text-gray-800 font-medium hover:text-purple-600">Profil</Link>
         </nav>
       </Header>
 
-      {/* Sidebar */}
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-        className="fixed top-12 left-0 h-[calc(100vh-48px)] bg-white shadow-md z-30 md:static md:w-48 md:h-full"
-      >
-        <Menu theme="light" mode="inline" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1" icon={<HomeOutlined />}>
-            <Link to="/">Accueil</Link>
-          </Menu.Item>
-          <Menu.Item key="2" icon={<BookOutlined />}>
-            <Link to="/courses">Cours</Link>
-          </Menu.Item>
-          <Menu.Item key="3" icon={<UserOutlined />}>
-            <Link to="/profile">Profil</Link>
-          </Menu.Item>
-        </Menu>
-      </Sider>
+      
 
       {/* Main Content */}
       <Content className="relative z-10 pt-14 pb-8 pl-0 md:pl-48 max-w-3xl mx-auto px-4">
@@ -228,7 +210,7 @@ const CourseDetails = () => {
           {/* Back Button */}
           <div className="text-center mt-6">
             <Link
-              to="/courses"
+              to="/getcours"
               className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors duration-200 font-medium"
             >
               <FiArrowLeft size={16} />

@@ -20,6 +20,7 @@
     "fullcalendar": "^6.1.17",
     "git-filter-repo": "^0.0.30",
     "install": "^0.13.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.510.0",
     "npm": "^10.9.2",
     "peerjs": "^1.5.4",
